@@ -17,27 +17,27 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (formData.password !== formData.repeat_password) {
       alert("Passwords do not match!");
       return;
     }
-
-    const { repeat_password, ...payload } = formData; // Exclude repeat_password
-
+  
+    const { repeat_password, ...payload } = formData;
+  
     try {
-      const response = await fetch("http://localhost:5000/api/register", {
+      const response = await fetch("http://localhost:5000/api/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
-
+  
       const result = await response.json();
       if (response.ok) {
         alert("Registration successful");
-        console.log(result);
+        console.log("Registered user:", result.user);
       } else {
         alert("Registration failed: " + result.message);
       }

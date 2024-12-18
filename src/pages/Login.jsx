@@ -8,20 +8,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = { username, password };
-
+  
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
-
+  
       const result = await response.json();
       if (response.ok) {
         alert("Login successful");
-        console.log(result);
+        console.log("Logged in user:", result.user);
       } else {
         alert("Login failed: " + result.message);
       }
