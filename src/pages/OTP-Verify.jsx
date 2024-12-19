@@ -1,14 +1,32 @@
 import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "../styles/OTP-Verify.css";
 
 const OTPVerify = () => {
   const [otp, setOtp] = useState("");
+  const { userId } = useParams(); // Get user ID from URL
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitted OTP:", otp);
-    // Add backend call here
-    alert(`OTP ${otp} submitted!`);
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/${userId}/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, otp }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("OTP Verified!");
+        navigate(`/dashboard/${userId}`);
+      } else {
+        alert("OTP verification failed: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error during OTP verification:", error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (

@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import "../styles/Login.css"; // Connect Login.css
+import { useNavigate } from "react-router-dom";
+import "../styles/Login.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = { username, password };
-  
+
     try {
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
@@ -17,11 +19,17 @@ const Login = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       const result = await response.json();
       if (response.ok) {
         alert("Login successful");
-        console.log("Logged in user:", result.user);
+        if (!result.user.otp_secret) {
+          // Redirect to QR-Scan page with user_id in the URL
+          navigate(`/qr-scan/${result.user.user_id}`);
+        } else {
+          // Redirect to OTP-Verify page if `otp_secret` is already set
+          navigate(`/otp-verify/${result.user.user_id}`);
+        }
       } else {
         alert("Login failed: " + result.message);
       }

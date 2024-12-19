@@ -2,8 +2,9 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import QRScan from "./pages/QR-Scan"
-import OTPVerify from "./pages/OTP-Verify"
+import QRScan from "./pages/QR-Scan";
+import OTPVerify from "./pages/OTP-Verify";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -11,8 +12,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/otp-verify" element={<OTPVerify />} />
-        <Route path="/qr-scan" element={<QRScan />} />
+        <Route path="/qr-scan/:userId" element={<QRScan />} />
+        <Route path="/otp-verify/:userId" element={<OTPVerify />} />
+        <Route path="/dashboard/:userId" element={<Dashboard />} />
       </Routes>
     </Router>
   );
