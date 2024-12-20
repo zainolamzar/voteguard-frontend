@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../election/Election-Form.css";
 
+const apiUrl = import.meta.env.VITE_BE_URL;
+
 const ElectionForm = () => {
   const { userId } = useParams(); // Get user ID from URL
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ const ElectionForm = () => {
       }
   
       // Check uniqueness with the backend
-      const response = await fetch(`http://localhost:5000/api/elections/check-code/${code}`);
+      const response = await fetch(`${apiUrl}/api/elections/check-code/${code}`);
       const result = await response.json();
       isUnique = !result.exists;
     }
@@ -44,7 +46,7 @@ const ElectionForm = () => {
     const election_code = await generateUniqueElectionCode();
   
     try {
-      const response = await fetch(`http://localhost:5000/api/elections/${userId}/election`, {
+      const response = await fetch(`${process.env.VITE_BE_URL}/api/elections/${userId}/election`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, election_code }),

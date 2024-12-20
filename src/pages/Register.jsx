@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import "../pages/Register.css"; // Connect Register.css
+import "../pages/Register.css";
+
+const apiUrl = import.meta.env.VITE_BE_URL;
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +28,7 @@ const Register = () => {
     const { repeat_password, ...payload } = formData;
   
     try {
-      const response = await fetch("http://localhost:5000/api/users/register", {
+      const response = await fetch(`${apiUrl}/api/users/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

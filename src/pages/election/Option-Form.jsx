@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../election/Option-Form.css";
 
+const apiUrl = import.meta.env.VITE_BE_URL;
+
 const OptionForm = () => {
   const { userId, electionId } = useParams(); // Get user ID and election ID from URL
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ const OptionForm = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`http://localhost:5000/api/elections/${userId}/${electionId}`, {
+      const response = await fetch(`${apiUrl}/api/elections/${userId}/${electionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ options }),

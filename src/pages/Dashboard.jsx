@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../pages/Dashboard.css";
 
+const apiUrl = import.meta.env.VITE_BE_URL;
+
 const Dashboard = () => {
   const { userId } = useParams(); // Get user ID from URL
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ const Dashboard = () => {
     // Fetch all elections associated with the user
     const fetchElections = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/elections/${userId}/election`);
+        const response = await fetch(`${apiUrl}/api/elections/${userId}/election`);
         const result = await response.json();
         if (response.ok) {
           setElections(result);

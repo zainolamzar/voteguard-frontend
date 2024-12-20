@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../pages/OTP-Verify.css";
 
+const apiUrl = import.meta.env.VITE_BE_URL;
+
 const OTPVerify = () => {
   const [otp, setOtp] = useState("");
   const { userId } = useParams(); // Get user ID from URL
@@ -10,7 +12,7 @@ const OTPVerify = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${userId}/verify-otp`, {
+      const response = await fetch(`${apiUrl}/api/users/${userId}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, otp }),

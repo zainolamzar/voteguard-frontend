@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../pages/QR-Scan.css";
 
+const apiUrl = import.meta.env.VITE_BE_URL;
+
 const QRScan = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const { userId } = useParams(); // Get user ID from URL
@@ -13,7 +15,7 @@ const QRScan = () => {
     } else {
       const fetchQrCode = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/users/${userId}/generate-qr`);
+          const response = await fetch(`${apiUrl}/api/users/${userId}/generate-qr`);
           if (response.ok) {
             const data = await response.json();
             setQrCodeUrl(data.qrCodeUrl);

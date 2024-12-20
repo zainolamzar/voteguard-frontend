@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const apiUrl = import.meta.env.VITE_BE_URL;
+
 const ElectionUpdate = () => {
   const { userId, electionId } = useParams();
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ const ElectionUpdate = () => {
   useEffect(() => {
     const fetchElectionData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/elections/${userId}/${electionId}`);
+        const response = await axios.get(`${apiUrl}/api/elections/${userId}/${electionId}`);
         const election = response.data.election;
 
         // Format the start_datetime and end_datetime to match the required input format
@@ -64,7 +66,7 @@ const ElectionUpdate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/elections/${userId}/${electionId}`, electionData);
+      await axios.put(`${apiUrl}/api/elections/${userId}/${electionId}`, electionData);
       alert("Election updated successfully!");
       navigate(`/election/${userId}/detail/${electionId}`);
     } catch (err) {
