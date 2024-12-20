@@ -1,17 +1,39 @@
-.dashboard-container {
-    text-align: center;
-    padding: 20px;
-}
-.logout-button {
+.election-list-container {
     margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #f44336;
-    color: white;
-    border: none;
+  }
+  
+  .election-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .election-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-}
-.logout-button:hover {
-    background-color: #d32f2f;
-}  
+    transition: background-color 0.2s ease;
+  }
+  
+  .election-item:hover {
+    background-color: #e9ecef;
+  }
+  
+  .election-info h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  .election-info p {
+    margin: 5px 0 0;
+    color: #6c757d;
+  }
+  
+  .view-details {
+    color: #007bff;
+    font-weight: bold;
+  }  
