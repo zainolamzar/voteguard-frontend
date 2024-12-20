@@ -13,13 +13,23 @@ const Dashboard = () => {
     navigate("/"); // Redirect to login page
   };
 
+  const handleCreateElection = () => {
+    // Redirect to the Election Form page for the logged-in user
+    navigate(`/election-form/${userId}`);
+  };
+
   return (
     <div className="dashboard-container">
       <h1>Welcome to your Dashboard!</h1>
       <p>User ID: {userId}</p>
-      <button onClick={handleLogout} className="logout-button">
-        Logout
-      </button>
+      <div className="dashboard-actions">
+        <button onClick={handleCreateElection} className="create-election-button">
+          Create New Election
+        </button>
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
