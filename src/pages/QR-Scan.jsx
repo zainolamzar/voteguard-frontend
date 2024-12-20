@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../styles/QR-Scan.css";
+import "../pages/QR-Scan.css";
 
 const QRScan = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState("");

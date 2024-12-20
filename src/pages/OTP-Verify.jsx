@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../styles/OTP-Verify.css";
+import "../pages/OTP-Verify.css";
 
 const OTPVerify = () => {
   const [otp, setOtp] = useState("");

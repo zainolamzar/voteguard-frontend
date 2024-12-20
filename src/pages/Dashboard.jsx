@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../styles/Dashboard.css";
+import "../pages/Dashboard.css";
 
 const Dashboard = () => {
   const { userId } = useParams(); // Get user ID from URL
