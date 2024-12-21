@@ -46,6 +46,11 @@ const Dashboard = () => {
     navigate(`/election/${userId}/detail/${electionId}`);
   };
 
+  const handleJoinElection = () => {
+    // Redirect to the Join Election page
+    navigate(`/voter/join/${userId}`);
+  };
+
   return (
     <div className="dashboard-container">
       <h1>Welcome to your Dashboard!</h1>
@@ -53,6 +58,9 @@ const Dashboard = () => {
       <div className="dashboard-actions">
         <button onClick={handleCreateElection} className="create-election-button">
           Create New Election
+        </button>
+        <button onClick={handleJoinElection} className="join-election-button">
+          Join Election
         </button>
         <button onClick={handleLogout} className="logout-button">
           Logout

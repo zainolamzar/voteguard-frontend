@@ -5,8 +5,9 @@ import "../election/Election-Detail.css";
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const ElectionDetail = () => {
-  const { userId, electionId } = useParams(); // Get user and election IDs from URL
-  const [election, setElection] = useState(null); // State to hold the election details
+  const { userId, electionId } = useParams();
+  const [election, setElection] = useState(null);
+  const [acceptedVoters, setAcceptedVoters] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +27,23 @@ const ElectionDetail = () => {
       }
     };
 
+    const fetchAcceptedVoters = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/voters/${userId}/accepted-voters/${electionId}`);
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          throw new Error(`Failed to fetch accepted voters: ${errorMessage}`);
+        }
+        const result = await response.json();
+        setAcceptedVoters(result.acceptedVoters);
+      } catch (error) {
+        console.error("Error fetching accepted voters:", error);
+        alert("An error occurred while fetching accepted voters. Please check the API and try again.");
+      }
+    };
+
     fetchElectionDetails();
+    fetchAcceptedVoters();
   }, [userId, electionId]);
 
   // Function to handle deletion of the election
@@ -57,7 +74,9 @@ const ElectionDetail = () => {
     <div className="election-detail-container">
       {election ? (
         <>
+          {/* Election Details */}
           <h1>{election.title}</h1>
+          <h3>Election Code - {election.election_code}</h3>
           <p>{election.description}</p>
           <p>
             <strong>Start Date and Time:</strong> {new Date(election.start_datetime).toLocaleString()}
@@ -65,35 +84,35 @@ const ElectionDetail = () => {
           <p>
             <strong>End Date and Time:</strong> {new Date(election.end_datetime).toLocaleString()}
           </p>
-          <div className="election-options">
-            <h2>Options</h2>
-            {election.options && election.options.length > 0 ? (
+
+          {/* Accepted Voters Section */}
+          <div className="accepted-voters-container">
+            <h3>Accepted Voters</h3>
+            {acceptedVoters.length > 0 ? (
               <ul>
-                {election.options.map((option, index) => (
-                  <li key={index} className="option-item">
-                    <strong>Name:</strong> {option.name} <br />
-                    <strong>Description:</strong> {option.description}
+                {acceptedVoters.map((voter) => (
+                  <li key={voter.voter_id} className="voter-item">
+                    <strong>Name:</strong> {voter.first_name} {voter.last_name} <br />
+                    <strong>Email:</strong> {voter.email} <br />
+                    <strong>Username:</strong> {voter.username}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No options available for this election.</p>
+              <p>No accepted voters for this election yet.</p>
             )}
           </div>
 
-          {/* Button to navigate to the Election Update page */}
-          <button
-            onClick={() => navigate(`/election/${userId}/update/${electionId}`)}
-            className="update-button"
-          >
+          {/* Buttons */}
+          <button onClick={() => navigate(`/election/${userId}/update/${electionId}`)} className="update-button">
             Update Election Details
           </button>
-
-          {/* Button to delete the election */}
+          <button onClick={() => navigate(`/election/${userId}/manage-requests/${electionId}`)} className="manage-requests-button">
+            Manage Requests
+          </button>
           <button onClick={handleDelete} className="delete-button">
             Delete Election
           </button>
-
           <button onClick={() => navigate(`/dashboard/${userId}`)} className="back-button">
             Back to Dashboard
           </button>
