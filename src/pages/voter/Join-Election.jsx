@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import "../voter/Join-Election.css";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 

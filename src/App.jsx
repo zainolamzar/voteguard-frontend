@@ -12,6 +12,7 @@ import ElectionDetail from "./pages/election/Election-Detail";
 import ElectionUpdate from "./pages/election/Election-Update";
 import ManageRequest from "./pages/election/Manage-Request";
 import JoinElection from "./pages/voter/Join-Election";
+import JoinedElectionDetail from "./pages/voter/Joined-Election-Detail";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/election/:userId/manage-requests/:electionId" element={<ManageRequest />} />
         {/* Voter Module */}
         <Route path="/voter/join/:userId" element={<JoinElection />} />
+        <Route path="/election/join/:voterId/:electionId/detail" element={<JoinedElectionDetail />} />
       </Routes>
     </Router>
   );

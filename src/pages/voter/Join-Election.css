@@ -1,0 +1,38 @@
+.joined-election-detail-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .election-info h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .election-info p {
+    margin: 5px 0;
+  }
+  
+  .back-button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .error-container {
+    text-align: center;
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 18px;
+  }  
