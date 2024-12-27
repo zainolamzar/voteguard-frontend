@@ -4,22 +4,45 @@ import { useParams, useNavigate } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const JoinedElectionDetail = () => {
-  const { voterId, electionId } = useParams(); // Get voterId and electionId from URL params
+  const { voterId, electionId } = useParams();
   const navigate = useNavigate();
-  const [election, setElection] = useState(null); // Store election details
-  const [vote, setVote] = useState(""); // Store the selected vote
-  const [error, setError] = useState(""); // Store any error messages
+  const [election, setElection] = useState(null);
+  const [vote, setVote] = useState("");
+  const [error, setError] = useState("");
+  const [isEligible, setIsEligible] = useState(false); // Store voter's eligibility
 
   useEffect(() => {
+    const fetchVotingLimitation = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/voters/${voterId}/limitation`);
+        const result = await response.json();
+
+        if (response.ok) {
+          const { isEligibleToVote, ...limitation } = result.data;
+          setIsEligible(isEligibleToVote); // Store eligibility
+          setElection((prevElection) => ({
+            ...prevElection,
+            ...limitation,
+          }));
+        } else {
+          setError(result.message || "Failed to fetch voting limitation.");
+        }
+      } catch (error) {
+        console.error("Error fetching voting limitation:", error);
+        setError("An error occurred while fetching voting limitation.");
+      }
+    };
+
     const fetchElectionDetails = async () => {
       try {
         const response = await fetch(`${apiUrl}/api/ballots/${voterId}/${electionId}/options`);
         const result = await response.json();
         if (response.ok) {
-          setElection({
-            ...result.election, // Spread election details
-            options: result.options // Directly assign options from result
-          });
+          setElection((prevElection) => ({
+            ...prevElection,
+            ...result.election,
+            options: result.options,
+          }));
         } else {
           setError(result.message || "Failed to fetch election details.");
         }
@@ -28,7 +51,8 @@ const JoinedElectionDetail = () => {
         setError("An error occurred while fetching election details.");
       }
     };
-  
+
+    fetchVotingLimitation();
     fetchElectionDetails();
   }, [voterId, electionId]);
 
@@ -37,20 +61,25 @@ const JoinedElectionDetail = () => {
       alert("Please select a vote option.");
       return;
     }
-
+  
     try {
-      const response = await fetch(`${apiUrl}/api/ballots/submit`, {
+      // Submit the vote directly to the backend (without encryption)
+      const response = await fetch(`${apiUrl}/api/ballots/submit/${voterId}/${electionId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ electionId, encryptedVote: vote }), // Assuming `vote` is encrypted
+        body: JSON.stringify({
+          vote, // Directly submit the vote
+        }),
       });
-
+  
       const result = await response.json();
+  
       if (response.ok) {
-        alert("Your vote has been successfully submitted.");
-        navigate(`/election/join/${voterId}/${electionId}/detail`);
+        if (window.confirm("Your vote has been successfully submitted. Click OK to proceed.")) {
+          window.location.reload(); 
+        }
       } else {
         alert(result.message || "Failed to submit vote.");
       }
@@ -76,10 +105,10 @@ const JoinedElectionDetail = () => {
             <strong>End Time:</strong> {new Date(election.end_datetime).toLocaleString()}
           </p>
 
-          <div className="vote-options">
-            <h3>Select your vote:</h3>
-            {election && election.options ? (
-              election.options.length > 0 ? (
+          {isEligible ? (
+            <div className="vote-options">
+              <h3>Select your vote:</h3>
+              {election.options && election.options.length > 0 ? (
                 <form>
                   {election.options.map((option, index) => (
                     <div key={index}>
@@ -88,8 +117,8 @@ const JoinedElectionDetail = () => {
                         id={`option-${index}`}
                         name="vote"
                         value={option.name}
-                        checked={vote === option.name} // Ensure the selected option is checked
-                        onChange={() => setVote(option.name)} // Update selected vote on change
+                        checked={vote === option.name}
+                        onChange={() => setVote(option.name)}
                       />
                       <label htmlFor={`option-${index}`}>
                         <strong>{option.name}</strong> - {option.description}
@@ -99,15 +128,22 @@ const JoinedElectionDetail = () => {
                 </form>
               ) : (
                 <p>No voting options available.</p>
-              )
-            ) : (
-              <p>Loading options...</p> // This handles the case where the options are still loading
-            )}
-          </div>
-
-          <button onClick={handleVoteSubmit} className="vote-button">
-            Submit Vote
-          </button>
+              )}
+              <div>
+                <button onClick={handleVoteSubmit} className="vote-button">
+                  Submit Vote
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p>
+              {election.has_voted === 1
+                ? "You have already voted in this election."
+                : new Date() < new Date(election.start_datetime)
+                ? "The election has not started yet."
+                : "The election has ended."}
+            </p>
+          )}
         </div>
       ) : (
         <p>Loading election details...</p>
