@@ -4,12 +4,17 @@ import { useParams, useNavigate } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const JoinedElectionDetail = () => {
-  const { voterId, electionId } = useParams();
-  const navigate = useNavigate();
+  const { userId, voterId, electionId } = useParams();
+  const navigate = useNavigate();  // Added navigate hook
   const [election, setElection] = useState(null);
   const [vote, setVote] = useState("");
   const [error, setError] = useState("");
   const [isEligible, setIsEligible] = useState(false); // Store voter's eligibility
+  const [resultsLaunched, setResultsLaunched] = useState(false); // Track if results are launched
+  const [winner, setWinnerName] = useState("");
+  const [totalVotes, setTotalVotes] = useState("");
+  const [votesPercent, setVotesPercent] = useState("");
+  const [electionParticipation, setElectionParticipation] = useState("");
 
   useEffect(() => {
     const fetchVotingLimitation = async () => {
@@ -52,8 +57,29 @@ const JoinedElectionDetail = () => {
       }
     };
 
+    const fetchElectionResults = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/results/${electionId}`);
+        const result = await response.json();
+
+        if (response.ok) {
+          setResultsLaunched(true); // Results are launched
+          setWinnerName(result.result.winner.name);
+          setTotalVotes(result.result.total_votes);
+          setVotesPercent(result.result.winning_percent);
+          setElectionParticipation(result.result.participation);
+        } else {
+          setResultsLaunched(false); // Results are not launched yet
+        }
+      } catch (error) {
+        console.error("Error fetching election results:", error);
+        setResultsLaunched(false); // Handle API errors gracefully
+      }
+    };
+
     fetchVotingLimitation();
     fetchElectionDetails();
+    fetchElectionResults();
   }, [voterId, electionId]);
 
   const handleVoteSubmit = async () => {
@@ -61,24 +87,23 @@ const JoinedElectionDetail = () => {
       alert("Please select a vote option.");
       return;
     }
-  
+
     try {
-      // Submit the vote directly to the backend (without encryption)
       const response = await fetch(`${apiUrl}/api/ballots/submit/${voterId}/${electionId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          vote, // Directly submit the vote
+          vote,
         }),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         if (window.confirm("Your vote has been successfully submitted. Click OK to proceed.")) {
-          window.location.reload(); 
+          window.location.reload();
         }
       } else {
         alert(result.message || "Failed to submit vote.");
@@ -94,6 +119,11 @@ const JoinedElectionDetail = () => {
       <h1>Election Details</h1>
       {error && <p className="error">{error}</p>}
 
+      {/* Go Back Button */}
+      <button onClick={() => navigate(`/dashboard/${userId}`)} className="back-button">
+        Go Back to Dashboard
+      </button>
+
       {election ? (
         <div className="election-details">
           <h2>{election.title}</h2>
@@ -105,7 +135,19 @@ const JoinedElectionDetail = () => {
             <strong>End Time:</strong> {new Date(election.end_datetime).toLocaleString()}
           </p>
 
-          {isEligible ? (
+          {new Date() > new Date(election.end_datetime) ? (
+            resultsLaunched ? (
+              <div className="result-container">
+                <h3>Election Results</h3>
+                <p><strong>Participation:</strong> {electionParticipation} Voter(s)</p>
+                <p><strong>Winner:</strong> {winner}</p>
+                <p><strong>Total Votes:</strong> {totalVotes}</p>
+                <p><strong>Winning Percentage:</strong> {votesPercent}%</p>
+              </div>
+            ) : (
+              <p>Election result will be released soon!</p>
+            )
+          ) : isEligible ? (
             <div className="vote-options">
               <h3>Select your vote:</h3>
               {election.options && election.options.length > 0 ? (
@@ -116,9 +158,9 @@ const JoinedElectionDetail = () => {
                         type="radio"
                         id={`option-${index}`}
                         name="vote"
-                        value={option.name}
-                        checked={vote === option.name}
-                        onChange={() => setVote(option.name)}
+                        value={option.id}
+                        checked={vote === option.id}
+                        onChange={() => setVote(option.id)}
                       />
                       <label htmlFor={`option-${index}`}>
                         <strong>{option.name}</strong> - {option.description}

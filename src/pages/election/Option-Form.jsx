@@ -7,7 +7,7 @@ const apiUrl = import.meta.env.VITE_BE_URL;
 const OptionForm = () => {
   const { userId, electionId } = useParams(); // Get user ID and election ID from URL
   const navigate = useNavigate();
-  const [options, setOptions] = useState([{ name: "", description: "" }]);
+  const [options, setOptions] = useState([{ id: "1", name: "", description: "" }]);
 
   const handleOptionChange = (index, field, value) => {
     const updatedOptions = [...options];
@@ -16,11 +16,21 @@ const OptionForm = () => {
   };
 
   const handleAddOption = () => {
-    setOptions((prev) => [...prev, { name: "", description: "" }]);
+    setOptions((prev) => [
+      ...prev,
+      { id: (prev.length + 1).toString(), name: "", description: "" },
+    ]);
   };
 
   const handleRemoveOption = (index) => {
-    setOptions((prev) => prev.filter((_, i) => i !== index));
+    setOptions((prev) => {
+      const updatedOptions = prev.filter((_, i) => i !== index);
+      // Re-generate IDs to ensure they remain sequential
+      return updatedOptions.map((option, i) => ({
+        ...option,
+        id: (i + 1).toString(),
+      }));
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -36,7 +46,7 @@ const OptionForm = () => {
       const result = await response.json();
       if (response.ok) {
         alert("Options added successfully!");
-        navigate(`/dashboard/${userId}`);
+        navigate(`/generate-key/${userId}/${electionId}`);
       } else {
         alert(`Error: ${result.message}`);
       }

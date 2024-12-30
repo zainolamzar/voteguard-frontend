@@ -46,7 +46,7 @@ const ElectionForm = () => {
     const election_code = await generateUniqueElectionCode();
   
     try {
-      const response = await fetch(`${process.env.VITE_BE_URL}/api/elections/${userId}/election`, {
+      const response = await fetch(`${apiUrl}/api/elections/${userId}/election`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, election_code }),

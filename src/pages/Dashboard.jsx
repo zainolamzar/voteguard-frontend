@@ -74,7 +74,7 @@ const Dashboard = () => {
       console.error("Missing voterId or electionId");
       return;
     }
-    navigate(`/election/join/${voterId}/${electionId}/detail`);
+    navigate(`/election/${userId}/join/${voterId}/${electionId}/detail`);
   };
 
   return (

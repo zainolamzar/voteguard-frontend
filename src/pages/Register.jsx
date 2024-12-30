@@ -39,7 +39,7 @@ const Register = () => {
       const result = await response.json();
       if (response.ok) {
         alert("Registration successful");
-        navigate(`/`);
+        navigate(`/login`);
         console.log("Registered user:", result.user);
       } else {
         alert("Registration failed: " + result.message);

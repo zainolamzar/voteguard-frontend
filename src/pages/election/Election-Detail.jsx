@@ -8,6 +8,13 @@ const ElectionDetail = () => {
   const { userId, electionId } = useParams();
   const [election, setElection] = useState(null);
   const [acceptedVoters, setAcceptedVoters] = useState([]);
+  const [electionEnded, setElectionEnded] = useState(false);
+  const [electionResults, setElectionResults] = useState(false);
+  const [resultsLaunched, setResultsLaunched] = useState(false);  // Track if results have been launched
+  const [winner, setWinnerName] = useState();
+  const [totalVotes, setTotalVotes] = useState();
+  const [votesPercent, setVotesPercent] = useState();
+  const [electionParticipation, setElectionParticipation] = useState();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +25,13 @@ const ElectionDetail = () => {
         const result = await response.json();
         if (response.ok) {
           setElection(result.election); // Only set election data
+
+          // Check if the election has ended
+          const electionEndDate = new Date(result.election.end_datetime);
+          const currentDate = new Date();
+          if (currentDate > electionEndDate) {
+            setElectionEnded(true); // Mark election as ended if current time is past the end date
+          }
         } else {
           alert("Failed to fetch election details.");
         }
@@ -42,11 +56,37 @@ const ElectionDetail = () => {
       }
     };
 
+    const fetchElectionResults = async () => {
+      if (electionEnded) {
+        try {
+          const response = await fetch(`${apiUrl}/api/results/${electionId}`);
+          const result = await response.json();
+          if (response.ok) {
+
+            setElectionResults(true); // Update the state to indicate results are fetched
+            setResultsLaunched(true); // Mark results as launched
+            setWinnerName(result.result.winner.name); // Set winner name
+            setTotalVotes(result.result.total_votes); // Set total votes
+            setVotesPercent(result.result.winning_percent); // Set winning percentage
+            setElectionParticipation(result.result.participation);
+
+            console.log(result); // Log the entire result object
+            console.log(winner);
+          } else {
+            alert("Election results not yet available.");
+          }
+        } catch (error) {
+          console.error("Error fetching election results:", error);
+          alert("An error occurred while fetching the election results.");
+        }
+      }
+    };
+
     fetchElectionDetails();
     fetchAcceptedVoters();
-  }, [userId, electionId]);
+    fetchElectionResults();
+  }, [userId, electionId, electionEnded]);
 
-  // Function to handle deletion of the election
   const handleDelete = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this election? This action cannot be undone."
@@ -67,6 +107,24 @@ const ElectionDetail = () => {
         console.error("Error deleting election:", error);
         alert("An error occurred while deleting the election.");
       }
+    }
+  };
+
+  const handleLaunchResults = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/api/results/${userId}/${electionId}/generate`);
+      const result = await response.json();
+      if (response.ok) {
+        setElectionResults(result);
+        setResultsLaunched(true); // Mark results as launched
+        alert('Election results have been successfully generated!');
+        window.location.reload();
+      } else {
+        alert("Failed to generate election results.");
+      }
+    } catch (error) {
+      console.error("Error fetching election results:", error);
+      alert("An error occurred while fetching the election results.");
     }
   };
 
@@ -116,6 +174,34 @@ const ElectionDetail = () => {
           <button onClick={() => navigate(`/dashboard/${userId}`)} className="back-button">
             Back to Dashboard
           </button>
+
+          {/* Launch Result Button (only visible if election has ended) */}
+          {electionEnded && !resultsLaunched && (
+            <button onClick={handleLaunchResults} className="launch-results-button">
+              Launch Results
+            </button>
+          )}
+
+          {/* Display Result or Message */}
+          {electionEnded ? (
+            resultsLaunched ? (
+              <div className="result-container">
+                <h3>Election Results</h3>
+                {winner ? (
+                  <>
+                  <p><strong>Participation:</strong> {electionParticipation} Voter(s)</p>
+                    <p><strong>Winner:</strong> {winner}</p>
+                    <p><strong>Total Votes:</strong> {totalVotes}</p>
+                    <p><strong>Winning Percentage:</strong> {votesPercent}%</p>
+                  </>
+                ) : (
+                  <p>No results available yet.</p>
+                )}
+              </div>
+            ) : (
+              <p>Please wait, results will be launched soon!</p>
+            )
+          ) : null}
         </>
       ) : (
         <p>Loading election details...</p>
