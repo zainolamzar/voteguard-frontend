@@ -74,52 +74,73 @@ const ElectionUpdate = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="text-center text-xl font-semibold">Loading...</div>;
+  if (error) return <div className="text-center text-xl text-red-600">{error}</div>;
 
   return (
-    <div>
-      <h2>Update Election</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+      <h2 className="text-3xl font-bold text-center text-[#003366] mb-6">Update Election</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label>Title</label>
+          <label htmlFor="title" className="block text-[#003366] font-semibold">Title</label>
           <input
             type="text"
             name="title"
             value={electionData.title}
             onChange={handleChange}
             required
+            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B]"
           />
         </div>
         <div>
-          <label>Description</label>
+          <label htmlFor="description" className="block text-[#003366] font-semibold">Description</label>
           <textarea
             name="description"
             value={electionData.description}
             onChange={handleChange}
+            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B]"
+            rows="4"
           />
         </div>
-        <div>
-          <label>Start Date</label>
-          <input
-            type="datetime-local"
-            name="start_datetime"
-            value={electionData.start_datetime}
-            onChange={handleChange}
-            required
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="start_datetime" className="block text-[#003366] font-semibold">Start Date and Time</label>
+            <input
+              type="datetime-local"
+              name="start_datetime"
+              value={electionData.start_datetime}
+              onChange={handleChange}
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B]"
+            />
+          </div>
+          <div>
+            <label htmlFor="end_datetime" className="block text-[#003366] font-semibold">End Date and Time</label>
+            <input
+              type="datetime-local"
+              name="end_datetime"
+              value={electionData.end_datetime}
+              onChange={handleChange}
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B]"
+            />
+          </div>
         </div>
-        <div>
-          <label>End Date</label>
-          <input
-            type="datetime-local"
-            name="end_datetime"
-            value={electionData.end_datetime}
-            onChange={handleChange}
-            required
-          />
+        <div className="flex justify-center space-x-4">
+          <button
+            type="submit"
+            className="px-6 py-3 bg-[#00897B] text-white font-semibold rounded-md hover:bg-[#006f62] transition duration-300"
+          >
+            Update Election
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(`/election/${userId}/detail/${electionId}`)}
+            className="px-6 py-3 bg-[#003366] text-white font-semibold rounded-md hover:bg-[#001f3b] transition duration-300"
+          >
+            Cancel
+          </button>
         </div>
-        <button type="submit">Update Election</button>
       </form>
     </div>
   );

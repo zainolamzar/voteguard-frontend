@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../pages/Dashboard.css";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -109,6 +108,18 @@ const Dashboard = () => {
     });
   };
 
+  const formatDateTime = (dateString) => {
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return new Intl.DateTimeFormat("en-MY", options).format(new Date(dateString));
+  };
+  
   return (
     <div className="dashboard-container">
       <div className="bg-[#003366] w-full text-white p-6 flex justify-between items-center">
@@ -122,11 +133,11 @@ const Dashboard = () => {
           Logout
         </button>
       </div>
-
+  
       <div className="text-center mt-10">
         <h1 className="text-3xl font-semibold">Welcome to Voteguard</h1>
       </div>
-
+  
       <div className="my-6">
         <div className="flex justify-center space-x-4 mb-6">
           <button onClick={() => setTab("all")} className="bg-[#003366] text-white hover:text-white hover:bg-[#001F3D] px-4 py-2 rounded">
@@ -142,12 +153,12 @@ const Dashboard = () => {
             Ended
           </button>
         </div>
-
+  
         <div className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">My Elections</h2>
           </div>
-
+  
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Create New Election Card */}
             <div
@@ -156,7 +167,7 @@ const Dashboard = () => {
             >
               <h3 className="text-xl font-semibold">Create New Election</h3>
             </div>
-
+  
             {filterElections(elections).map((election) => (
               <div
                 key={election.election_id}
@@ -164,7 +175,7 @@ const Dashboard = () => {
                 onClick={() => handleViewElectionDetails(election.election_id)}
               >
                 <h3 className="text-xl font-semibold">{election.title}</h3>
-                <p className="text-gray-600">Due: {election.end_datetime}</p>
+                <p className="text-gray-600">Due: {formatDateTime(election.end_datetime)}</p>
                 <p className={`mt-2 text-sm font-medium ${getStatus(election.start_datetime, election.end_datetime) === "Ongoing" ? 'text-green-500' : getStatus(election.start_datetime, election.end_datetime) === "In Process" ? 'text-yellow-500' : 'text-red-500'}`}>
                   {getStatus(election.start_datetime, election.end_datetime)}
                 </p>
@@ -172,12 +183,12 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-
+  
         <div className="mt-10">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Joined Elections</h2>
           </div>
-
+  
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Join Election Card */}
             <div
@@ -186,7 +197,7 @@ const Dashboard = () => {
             >
               <h3 className="text-xl font-semibold">Join Election</h3>
             </div>
-
+  
             {filterElections(joinedElections).map((election) => (
               <div
                 key={election.election_id}
@@ -194,7 +205,7 @@ const Dashboard = () => {
                 onClick={() => handleViewJoinedElectionDetails(election.voter_id, election.election_id)}
               >
                 <h3 className="text-xl font-semibold">{election.title}</h3>
-                <p className="text-gray-600">Due: {election.end_datetime}</p>
+                <p className="text-gray-600">Due: {formatDateTime(election.end_datetime)}</p>
                 <p className={`mt-2 text-sm font-medium ${getStatus(election.start_datetime, election.end_datetime) === "Ongoing" ? 'text-green-500' : getStatus(election.start_datetime, election.end_datetime) === "In Process" ? 'text-yellow-500' : 'text-red-500'}`}>
                   {getStatus(election.start_datetime, election.end_datetime)}
                 </p>

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../voter/Join-Election.css";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -39,22 +38,48 @@ const JoinElection = () => {
   };
 
   return (
-    <div className="join-election-container">
-      <h1>Join an Election</h1>
-      <form onSubmit={handleSubmit} className="join-election-form">
-        <label htmlFor="election-code">Enter Election Code:</label>
-        <input
-          type="text"
-          id="election-code"
-          value={electionCode}
-          onChange={(e) => setElectionCode(e.target.value)}
-          required
-        />
-        <div className="form-buttons">
-          <button type="submit" className="join-button">Request</button>
-          <button type="button" className="cancel-button" onClick={handleCancel}>Cancel</button>
-        </div>
-      </form>
+    <div className="bg-[#F5F5F5] min-h-screen flex flex-col items-center py-10 px-6">
+      <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg">
+        <h1 className="text-3xl font-poppins font-bold text-[#003366] text-center mb-6">
+          Join an Election
+        </h1>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label
+              htmlFor="election-code"
+              className="block text-lg font-roboto text-[#003366] mb-2"
+            >
+              Enter Election Code
+            </label>
+            <input
+              type="text"
+              id="election-code"
+              value={electionCode}
+              onChange={(e) => setElectionCode(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg border border-[#B0BEC5] focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B] font-roboto text-lg"
+            />
+          </div>
+
+          <div className="flex justify-between gap-4">
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#00897B] text-white font-roboto rounded-lg hover:bg-[#00695C] focus:outline-none transition duration-300"
+            >
+              Request Participation
+            </button>
+
+            <button
+              type="button"
+              className="w-full py-3 bg-[#D32F2F] text-white font-roboto rounded-lg hover:bg-[#B71C1C] focus:outline-none transition duration-300"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

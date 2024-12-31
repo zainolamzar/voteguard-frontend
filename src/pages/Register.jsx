@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Added Link for navigation
-import "../pages/Register.css";
+import { useNavigate, Link } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 

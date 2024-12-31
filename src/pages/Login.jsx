@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../pages/Login.css";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
