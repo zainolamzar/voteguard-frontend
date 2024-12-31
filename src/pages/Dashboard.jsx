@@ -163,7 +163,7 @@ const Dashboard = () => {
             {/* Create New Election Card */}
             <div
               onClick={handleCreateElection}
-              className="bg-[#003366] text-white p-6 rounded-lg shadow-lg cursor-pointer"
+              className="bg-[#003366] text-white hover:text-white hover:bg-[#001F3D] p-6 rounded-lg shadow-lg cursor-pointer"
             >
               <h3 className="text-xl font-semibold">Create New Election</h3>
             </div>
@@ -193,7 +193,7 @@ const Dashboard = () => {
             {/* Join Election Card */}
             <div
               onClick={handleJoinElection}
-              className="bg-[#003366] text-white p-6 rounded-lg shadow-lg cursor-pointer"
+              className="bg-[#003366] text-white hover:text-white hover:bg-[#001F3D] p-6 rounded-lg shadow-lg cursor-pointer"
             >
               <h3 className="text-xl font-semibold">Join Election</h3>
             </div>
