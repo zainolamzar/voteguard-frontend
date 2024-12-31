@@ -42,33 +42,55 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit} className="login-form">
-        <div className="form-group">
-          <label>Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-            required
-          />
-        </div>
-        <button type="submit" className="login-button">
+    <div className="flex items-center justify-center min-h-screen bg-[#F5F5F5] font-roboto">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-3xl font-bold text-[#003366] text-center mb-6">
           Login
-        </button>
-      </form>
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="form-group">
+            <label className="block text-[#003366] text-lg font-medium mb-2">
+              Username:
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
+              required
+              className="w-full px-4 py-3 border border-[#00897B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B] text-gray-700"
+            />
+          </div>
+          <div className="form-group">
+            <label className="block text-[#003366] text-lg font-medium mb-2">
+              Password:
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              required
+              className="w-full px-4 py-3 border border-[#00897B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B] text-gray-700"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-3 bg-[#003366] text-white font-bold rounded-md hover:bg-[#00529B] transition duration-300"
+          >
+            Login
+          </button>
+        </form>
+        <p className="mt-6 text-center text-gray-600">
+          Don't have an account?{" "}
+          <span
+            onClick={() => navigate("/register")}
+            className="text-[#003366] font-medium hover:underline cursor-pointer"
+          >
+            Sign up
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

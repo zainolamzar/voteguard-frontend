@@ -65,6 +65,10 @@ const ElectionForm = () => {
     }
   };
 
+  const handleCancel = () => {
+    navigate(`/dashboard/${userId}`); // Redirect to the dashboard
+  };
+
   return (
     <div className="election-form-container">
       <h2>Create Election</h2>
@@ -107,7 +111,12 @@ const ElectionForm = () => {
                 required
             />
         </div>
-        <button type="submit">Submit</button>
+        <div className="form-buttons">
+          <button type="submit">Submit</button>
+          <button type="button" onClick={handleCancel} className="cancel-button">
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   );

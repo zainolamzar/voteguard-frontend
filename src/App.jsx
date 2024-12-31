@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -20,7 +20,8 @@ function App() {
     <Router>
       <Routes>
         {/* General */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Navigate to="/" replace />} /> 
         <Route path="/register" element={<Register />} />
         <Route path="/qr-scan/:userId" element={<QRScan />} />
         <Route path="/otp-verify/:userId" element={<OTPVerify />} />

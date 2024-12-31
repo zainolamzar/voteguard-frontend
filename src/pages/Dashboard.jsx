@@ -51,7 +51,7 @@ const Dashboard = () => {
     // Clear any stored user session information (e.g., tokens)
     localStorage.removeItem("userToken");
     alert("You have successfully logged out.");
-    navigate("/");
+    navigate("/login");
   };
 
   const handleCreateElection = () => {
