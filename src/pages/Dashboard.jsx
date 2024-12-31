@@ -5,13 +5,13 @@ import "../pages/Dashboard.css";
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const Dashboard = () => {
-  const { userId } = useParams(); // Get user ID from URL
+  const { userId } = useParams();
   const navigate = useNavigate();
-  const [elections, setElections] = useState([]); // State to hold the list of elections created by the user
-  const [joinedElections, setJoinedElections] = useState([]); // State to hold the list of joined elections
+  const [elections, setElections] = useState([]);
+  const [joinedElections, setJoinedElections] = useState([]);
+  const [tab, setTab] = useState("all"); // Tab for filtering elections
 
   useEffect(() => {
-    // Fetch all elections created by the user
     const fetchElections = async () => {
       try {
         const response = await fetch(`${apiUrl}/api/elections/${userId}/election`);
@@ -27,7 +27,6 @@ const Dashboard = () => {
       }
     };
 
-    // Fetch all elections the user has successfully joined
     const fetchJoinedElections = async () => {
       try {
         const response = await fetch(`${apiUrl}/api/voters/${userId}/joined-elections`);
@@ -48,24 +47,20 @@ const Dashboard = () => {
   }, [userId]);
 
   const handleLogout = () => {
-    // Clear any stored user session information (e.g., tokens)
     localStorage.removeItem("userToken");
     alert("You have successfully logged out.");
     navigate("/login");
   };
 
   const handleCreateElection = () => {
-    // Redirect to the Election Form page for the logged-in user
     navigate(`/election-form/${userId}`);
   };
 
   const handleViewElectionDetails = (electionId) => {
-    // Redirect to the Election Detail page for the selected election
     navigate(`/election/${userId}/detail/${electionId}`);
   };
 
   const handleJoinElection = () => {
-    // Redirect to the Join Election page
     navigate(`/voter/join/${userId}`);
   };
 
@@ -77,68 +72,139 @@ const Dashboard = () => {
     navigate(`/election/${userId}/join/${voterId}/${electionId}/detail`);
   };
 
+  const getStatus = (startDatetime, endDatetime) => {
+    const now = new Date();
+
+    if (now < new Date(startDatetime)) {
+      return "In Process";
+    } else if (now > new Date(endDatetime)) {
+      return "Ended";
+    } else {
+      return "Ongoing";
+    }
+  };
+
+  const filterElections = (elections) => {
+    if (tab === "all") {
+      return elections;
+    }
+  
+    const now = new Date();
+  
+    return elections.filter((election) => {
+      const startDatetime = new Date(election.start_datetime);
+      const endDatetime = new Date(election.end_datetime);
+  
+      if (tab === "Ongoing") {
+        // Election is ongoing if now() is between start_datetime and end_datetime
+        return now > startDatetime && now < endDatetime;
+      } else if (tab === "In process") {
+        // Election is in process if now() is before start_datetime
+        return now < startDatetime;
+      } else if (tab === "Ended") {
+        // Election is ended if now() is after end_datetime
+        return now > endDatetime;
+      }
+      return false; // If tab does not match any condition, return false (fallback)
+    });
+  };
+
   return (
     <div className="dashboard-container">
-      <h1>Welcome to your Dashboard!</h1>
-      <p>User ID: {userId}</p>
-      <div className="dashboard-actions">
-        <button onClick={handleCreateElection} className="create-election-button">
-          Create New Election
-        </button>
-        <button onClick={handleJoinElection} className="join-election-button">
-          Join Election
-        </button>
-        <button onClick={handleLogout} className="logout-button">
+      <div className="bg-[#003366] w-full text-white p-6 flex justify-between items-center">
+        <div className="flex justify-center items-center w-full">
+          <img src="logo.png" alt="Logo" className="h-12 w-auto" />
+        </div>
+      </div>
+
+      <div>
+        <button
+          onClick={handleLogout}
+          className="absolute top-16 right-6 text-red-500 bg-transparent hover:bg-transparent"
+        >
           Logout
         </button>
       </div>
 
-      {/* Created Elections Section */}
-      <div className="election-list-container">
-        <h2>Your Elections</h2>
-        {elections.length > 0 ? (
-          <ul className="election-list">
-            {elections.map((election) => (
-              <li
-                key={election.election_id}
-                className="election-item"
-                onClick={() => handleViewElectionDetails(election.election_id)}
-              >
-                <div className="election-info">
-                  <h3>{election.title}</h3>
-                  <p>{election.description}</p>
-                </div>
-                <span className="view-details">View Details →</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>You have not created any elections yet.</p>
-        )}
+      <div className="text-center mt-10">
+        <h1 className="text-3xl font-semibold">Welcome to Voteguard</h1>
       </div>
 
-      {/* Joined Elections Section */}
-      <div className="joined-elections-container">
-        <div>
-        <h2>Joined Elections</h2>
-        <ul>
-          {joinedElections.map((election) => (
-            <li key={election.election_id}>
-              <h3>{election.title}</h3>
-              <button
-                onClick={() =>
-                  handleViewJoinedElectionDetails(
-                    election.voter_id, // Ensure voter_id is part of the election object
-                    election.election_id
-                  )
-                }
+      <div className="my-6">
+        <div className="flex justify-center space-x-4 mb-6">
+          <button onClick={() => setTab("all")} className="bg-[#003366] text-white px-4 py-2 rounded">
+            All
+          </button>
+          <button onClick={() => setTab("ongoing")} className="bg-[#003366] text-white px-4 py-2 rounded">
+            Ongoing
+          </button>
+          <button onClick={() => setTab("in process")} className="bg-[#003366] text-white px-4 py-2 rounded">
+            In Process
+          </button>
+          <button onClick={() => setTab("ended")} className="bg-[#003366] text-white px-4 py-2 rounded">
+            Ended
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">My Elections</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Create New Election Card */}
+            <div
+              onClick={handleCreateElection}
+              className="bg-[#003366] text-white p-6 rounded-lg shadow-lg cursor-pointer"
+            >
+              <h3 className="text-xl font-semibold">Create New Election</h3>
+            </div>
+
+            {filterElections(elections).map((election) => (
+              <div
+                key={election.election_id}
+                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleViewElectionDetails(election.election_id)}
               >
-                View Details
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+                <h3 className="text-xl font-semibold">{election.title}</h3>
+                <p className="text-gray-600">Due: {election.end_datetime}</p>
+                <p className={`mt-2 text-sm font-medium ${getStatus(election.start_datetime, election.end_datetime) === "Ongoing" ? 'text-green-500' : getStatus(election.start_datetime, election.end_datetime) === "In Process" ? 'text-yellow-500' : 'text-red-500'}`}>
+                  {getStatus(election.start_datetime, election.end_datetime)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Joined Elections</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Join Election Card */}
+            <div
+              onClick={handleJoinElection}
+              className="bg-[#003366] text-white p-6 rounded-lg shadow-lg cursor-pointer"
+            >
+              <h3 className="text-xl font-semibold">Join Election</h3>
+            </div>
+
+            {filterElections(joinedElections).map((election) => (
+              <div
+                key={election.election_id}
+                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleViewJoinedElectionDetails(election.voter_id, election.election_id)}
+              >
+                <h3 className="text-xl font-semibold">{election.title}</h3>
+                <p className="text-gray-600">Due: {election.end_datetime}</p>
+                <p className={`mt-2 text-sm font-medium ${getStatus(election.start_datetime, election.end_datetime) === "Ongoing" ? 'text-green-500' : getStatus(election.start_datetime, election.end_datetime) === "In Process" ? 'text-yellow-500' : 'text-red-500'}`}>
+                  {getStatus(election.start_datetime, election.end_datetime)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
