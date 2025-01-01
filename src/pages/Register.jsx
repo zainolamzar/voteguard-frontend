@@ -54,6 +54,16 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 font-roboto">
       <div className="w-full max-w-md p-8">
+        <div className="flex justify-center mb-2">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full border-4 border-white"></div>
+            <img
+              src="/src/assets/main-logo.png"
+              alt="Voteguard Logo"
+              className="h-16 w-16 object-cover z-10 relative rounded-full"
+            />
+          </div>
+        </div>
         <h2 className="text-3xl font-bold text-[#003366] text-center mb-6">
           Register
         </h2>

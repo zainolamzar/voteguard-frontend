@@ -124,7 +124,7 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="bg-[#003366] w-full text-white p-6 flex justify-between items-center">
         <div className="flex justify-center items-center w-full">
-          <img src="logo.png" alt="Logo" className="h-12 w-auto" />
+          <img src="/src/assets/main-logo.png" alt="Logo" className="h-12 w-auto rounded-full border-4 border-white bg-white" />
         </div>
         <button
           onClick={handleLogout}
