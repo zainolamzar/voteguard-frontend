@@ -132,7 +132,7 @@ const JoinedElectionDetail = () => {
 
         {election ? (
           <div className="space-y-6">
-            <h2 className="text-2xl font-poppins text-[#003366]">{election.title}</h2>
+            <h2 className="text-2xl font-poppins text-[#003366]">{election.title}'s Dashboard</h2>
             <p className="font-roboto text-gray-700">{election.description}</p>
             <p className="font-roboto text-lg text-[#003366]">
               <strong>Start Time:</strong> {new Date(election.start_datetime).toLocaleString()}

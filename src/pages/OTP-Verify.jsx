@@ -14,9 +14,9 @@ const OTPVerify = () => {
       const response = await fetch(`${apiUrl}/api/users/${userId}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, otp }),
+        body: JSON.stringify({ otp }), // Send only OTP in the request body
       });
-
+  
       const result = await response.json();
       if (response.ok) {
         alert("OTP Verified!");

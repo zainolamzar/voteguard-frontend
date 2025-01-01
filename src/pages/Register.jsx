@@ -12,13 +12,14 @@ const Register = () => {
     password: "",
     repeat_password: "",
   });
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [passwordValid, setPasswordValid] = useState({
     hasUpperCase: false,
     hasLowerCase: false,
     hasSymbol: false,
     hasNumber: false,
   });
+  const [isLoading, setIsLoading] = useState(false); // New state to track loading
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -31,7 +32,6 @@ const Register = () => {
     }
   };
 
-  // Validate password based on the requirements
   const checkPasswordValidity = (password) => {
     setPasswordValid({
       hasUpperCase: /[A-Z]/.test(password),
@@ -44,12 +44,26 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if passwords match
     if (formData.password !== formData.repeat_password) {
       alert("Passwords do not match!");
       return;
     }
 
+    // Check if password meets the requirements
+    if (
+      !passwordValid.hasUpperCase ||
+      !passwordValid.hasLowerCase ||
+      !passwordValid.hasSymbol ||
+      !passwordValid.hasNumber
+    ) {
+      alert("Password must meet the following requirements:\n- 1 or more uppercase letters\n- 1 or more lowercase letters\n- 1 or more symbols (e.g., !@#$%^&*)\n- 1 or more numbers");
+      return;
+    }
+
     const { repeat_password, ...payload } = formData;
+
+    setIsLoading(true); // Set loading to true before making the request
 
     try {
       const response = await fetch(`${apiUrl}/api/users/register`, {
@@ -70,6 +84,8 @@ const Register = () => {
     } catch (error) {
       console.error("Error during registration:", error);
       alert("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false); // Set loading to false once the request is done
     }
   };
 
@@ -91,7 +107,6 @@ const Register = () => {
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-group grid grid-cols-2 gap-4">
-            {/* First Name and Last Name side by side */}
             <div>
               <label className="block text-sm font-medium text-gray-600">First Name</label>
               <input
@@ -118,7 +133,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Username */}
           <div className="form-group">
             <label className="block text-sm font-medium text-gray-600">Username</label>
             <input
@@ -132,7 +146,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Email */}
           <div className="form-group">
             <label className="block text-sm font-medium text-gray-600">Email</label>
             <input
@@ -147,7 +160,6 @@ const Register = () => {
           </div>
 
           <div className="form-group grid grid-cols-2 gap-4">
-            {/* Password and Repeat Password side by side */}
             <div>
               <label className="block text-sm font-medium text-gray-600">Password</label>
               <input
@@ -174,7 +186,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Show Password Checkbox */}
           <div className="flex items-center space-x-2 mt-2">
             <input
               type="checkbox"
@@ -185,7 +196,6 @@ const Register = () => {
             <label className="text-sm text-gray-600">Show Password</label>
           </div>
 
-          {/* Password Requirements */}
           <div className="mt-4 text-sm text-gray-600 rounded bg-[#EBEBEB] p-2">
             <p>Password must include:</p>
             <ul className="list-disc pl-5 space-y-1">
@@ -207,25 +217,21 @@ const Register = () => {
           {/* Register Button */}
           <button
             type="submit"
-            className="w-full bg-[#003366] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#002244] focus:outline-none focus:ring-2 focus:ring-[#FFC107]"
-            disabled={
-              !passwordValid.hasUpperCase ||
-              !passwordValid.hasLowerCase ||
-              !passwordValid.hasSymbol ||
-              !passwordValid.hasNumber
-            }
+            className="w-full bg-[#003366] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#002244] focus:outline-none"
+            disabled={isLoading}
           >
-            Register
+            {isLoading ? "Loading..." : "Register"}
           </button>
-        </form>
 
-        {/* Navigation to Login */}
-        <p className="mt-6 text-center text-gray-600">
-          Already have an account?{" "}
-          <Link to="/login" className="text-[#003366] font-bold hover:underline">
-            Sign in
-          </Link>
-        </p>
+          <div className="mt-4 text-center text-sm">
+            <p>
+              Already have an account?{" "}
+              <Link to="/login" className="text-[#003366] font-semibold">
+                Sign In
+              </Link>
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   );

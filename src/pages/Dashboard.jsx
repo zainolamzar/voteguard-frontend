@@ -85,26 +85,34 @@ const Dashboard = () => {
 
   const filterElections = (elections) => {
     if (tab === "all") {
-      return elections;
+      // Sort elections: Ongoing, In Process, Ended
+      return elections.sort((a, b) => {
+        const statusA = getStatus(a.start_datetime, a.end_datetime);
+        const statusB = getStatus(b.start_datetime, b.end_datetime);
+
+        // Priority: Ongoing > In Process > Ended
+        if (statusA === "Ongoing" && statusB !== "Ongoing") return -1;
+        if (statusA !== "Ongoing" && statusB === "Ongoing") return 1;
+        if (statusA === "In Process" && statusB !== "In Process") return -1;
+        if (statusA !== "In Process" && statusB === "In Process") return 1;
+        return 0;
+      });
     }
-  
+
     const now = new Date();
-  
+
     return elections.filter((election) => {
       const startDatetime = new Date(election.start_datetime);
       const endDatetime = new Date(election.end_datetime);
-  
+
       if (tab === "ongoing") {
-        // Election is ongoing if now() is between start_datetime and end_datetime
         return now > startDatetime && now < endDatetime;
       } else if (tab === "in process") {
-        // Election is in process if now() is before start_datetime
         return now < startDatetime;
       } else if (tab === "ended") {
-        // Election is ended if now() is after end_datetime
         return now > endDatetime;
       }
-      return false; // If tab does not match any condition, return false (fallback)
+      return false;
     });
   };
 
@@ -119,7 +127,7 @@ const Dashboard = () => {
     };
     return new Intl.DateTimeFormat("en-MY", options).format(new Date(dateString));
   };
-  
+
   return (
     <div className="dashboard-container">
       <div className="bg-[#003366] w-full text-white p-6 flex justify-between items-center">
@@ -133,12 +141,12 @@ const Dashboard = () => {
           Logout
         </button>
       </div>
-  
+
       <div className="text-center mt-10">
         <h1 className="text-3xl font-semibold">Welcome to Voteguard</h1>
       </div>
-  
-      <div className="my-6">
+
+      <div className="my-6 mx-8">
         <div className="flex justify-center space-x-4 mb-6">
           <button onClick={() => setTab("all")} className="bg-[#003366] text-white hover:text-white hover:bg-[#001F3D] px-4 py-2 rounded">
             All
@@ -153,12 +161,12 @@ const Dashboard = () => {
             Ended
           </button>
         </div>
-  
+
         <div className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">My Elections</h2>
           </div>
-  
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Create New Election Card */}
             <div
@@ -167,7 +175,7 @@ const Dashboard = () => {
             >
               <h3 className="text-xl font-semibold">Create New Election</h3>
             </div>
-  
+
             {filterElections(elections).map((election) => (
               <div
                 key={election.election_id}
@@ -183,12 +191,12 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-  
+
         <div className="mt-10">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Joined Elections</h2>
           </div>
-  
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Join Election Card */}
             <div
@@ -197,7 +205,7 @@ const Dashboard = () => {
             >
               <h3 className="text-xl font-semibold">Join Election</h3>
             </div>
-  
+
             {filterElections(joinedElections).map((election) => (
               <div
                 key={election.election_id}

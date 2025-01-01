@@ -121,7 +121,7 @@ const ElectionDetail = () => {
       {election ? (
         <div className="bg-white shadow-lg rounded-lg p-8 max-w-3xl w-full">
           <h1 className="text-3xl font-poppins font-bold text-[#003366] mb-6">
-            {election.title}
+            {election.title}'s Dashboard
           </h1>
           <p className="text-sm text-gray-600 font-roboto mb-4">
             <strong>Election Code:</strong> {election.election_code}

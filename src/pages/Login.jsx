@@ -7,11 +7,14 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false); // New state for password visibility
+  const [isLoading, setIsLoading] = useState(false); // New state for loading
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = { username, password };
+
+    setIsLoading(true); // Set loading to true when the form is submitted
 
     try {
       const response = await fetch(`${apiUrl}/api/users/login`, {
@@ -38,6 +41,8 @@ const Login = () => {
     } catch (error) {
       console.error("Error during login:", error);
       alert("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false); // Set loading to false once the request is done
     }
   };
 
@@ -88,14 +93,15 @@ const Login = () => {
               onClick={() => setPasswordVisible(!passwordVisible)} // Toggle password visibility
               className="absolute right-3 top-[70%] transform -translate-y-1/2 text-[#003366] text-xl"
             >
-              {passwordVisible ? "🙈" : "👁️"} {/* Change icon based on visibility */}
+              {passwordVisible ? "🙊" : "🙈"} {/* Change icon based on visibility */}
             </button>
           </div>
           <button
             type="submit"
             className="w-full py-3 bg-[#003366] text-white font-bold rounded-md hover:bg-[#00529B] transition duration-300"
+            disabled={isLoading} // Disable the button when loading
           >
-            Login
+            {isLoading ? "Loading..." : "Login"} {/* Change button text when loading */}
           </button>
         </form>
         <p className="mt-6 text-center text-gray-600">
