@@ -6,6 +6,7 @@ const apiUrl = import.meta.env.VITE_BE_URL;
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false); // New state for password visibility
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -70,18 +71,25 @@ const Login = () => {
               className="w-full px-4 py-3 border border-[#00897B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B] text-gray-700"
             />
           </div>
-          <div className="form-group">
+          <div className="form-group relative">
             <label className="block text-[#003366] text-lg font-medium mb-2">
               Password:
             </label>
             <input
-              type="password"
+              type={passwordVisible ? "text" : "password"} // Toggle between text and password type
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               required
-              className="w-full px-4 py-3 border border-[#00897B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B] text-gray-700"
+              className="w-full px-4 py-3 border border-[#00897B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#00897B] text-gray-700 pr-12" // Added padding-right for space
             />
+            <button
+              type="button"
+              onClick={() => setPasswordVisible(!passwordVisible)} // Toggle password visibility
+              className="absolute right-3 top-[70%] transform -translate-y-1/2 text-[#003366] text-xl"
+            >
+              {passwordVisible ? "🙈" : "👁️"} {/* Change icon based on visibility */}
+            </button>
           </div>
           <button
             type="submit"

@@ -12,11 +12,33 @@ const Register = () => {
     password: "",
     repeat_password: "",
   });
-
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [passwordValid, setPasswordValid] = useState({
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasSymbol: false,
+    hasNumber: false,
+  });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Check password validity only when password is being entered
+    if (name === "password") {
+      checkPasswordValidity(value);
+    }
+  };
+
+  // Validate password based on the requirements
+  const checkPasswordValidity = (password) => {
+    setPasswordValid({
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasSymbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      hasNumber: /\d/.test(password),
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -129,7 +151,7 @@ const Register = () => {
             <div>
               <label className="block text-sm font-medium text-gray-600">Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -141,7 +163,7 @@ const Register = () => {
             <div>
               <label className="block text-sm font-medium text-gray-600">Repeat Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="repeat_password"
                 value={formData.repeat_password}
                 onChange={handleChange}
@@ -152,10 +174,46 @@ const Register = () => {
             </div>
           </div>
 
+          {/* Show Password Checkbox */}
+          <div className="flex items-center space-x-2 mt-2">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)}
+              className="h-4 w-4"
+            />
+            <label className="text-sm text-gray-600">Show Password</label>
+          </div>
+
+          {/* Password Requirements */}
+          <div className="mt-4 text-sm text-gray-600 rounded bg-[#EBEBEB] p-2">
+            <p>Password must include:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li className={passwordValid.hasUpperCase ? "text-green-500" : "text-red-500"}>
+                1 or more uppercase letters
+              </li>
+              <li className={passwordValid.hasLowerCase ? "text-green-500" : "text-red-500"}>
+                1 or more lowercase letters
+              </li>
+              <li className={passwordValid.hasSymbol ? "text-green-500" : "text-red-500"}>
+                1 or more symbols (e.g., !@#$%^&*)
+              </li>
+              <li className={passwordValid.hasNumber ? "text-green-500" : "text-red-500"}>
+                1 or more numbers
+              </li>
+            </ul>
+          </div>
+
           {/* Register Button */}
           <button
             type="submit"
             className="w-full bg-[#003366] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#002244] focus:outline-none focus:ring-2 focus:ring-[#FFC107]"
+            disabled={
+              !passwordValid.hasUpperCase ||
+              !passwordValid.hasLowerCase ||
+              !passwordValid.hasSymbol ||
+              !passwordValid.hasNumber
+            }
           >
             Register
           </button>
