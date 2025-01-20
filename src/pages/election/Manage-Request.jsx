@@ -7,6 +7,8 @@ const ManageRequest = () => {
   const { userId, electionId } = useParams(); // Get userId and electionId from URL
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]); // State to hold the list of voter requests
+  const [filteredRequests, setFilteredRequests] = useState([]); // State to hold filtered requests
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -18,6 +20,7 @@ const ManageRequest = () => {
 
         if (response.ok) {
           setRequests(result.requests);
+          setFilteredRequests(result.requests); // Initialize filteredRequests
         } else {
           alert(`Error: ${result.message}`);
         }
@@ -44,6 +47,7 @@ const ManageRequest = () => {
       if (response.ok) {
         alert("Request approved successfully.");
         setRequests(requests.filter((req) => req.voter_id !== voterId)); // Remove the approved request from the list
+        setFilteredRequests(filteredRequests.filter((req) => req.voter_id !== voterId)); // Update filtered list
       } else {
         alert(`Error: ${result.message}`);
       }
@@ -65,6 +69,7 @@ const ManageRequest = () => {
       if (response.ok) {
         alert("Request rejected successfully.");
         setRequests(requests.filter((req) => req.voter_id !== voterId)); // Remove the rejected request from the list
+        setFilteredRequests(filteredRequests.filter((req) => req.voter_id !== voterId)); // Update filtered list
       } else {
         alert(`Error: ${result.message}`);
       }
@@ -72,6 +77,20 @@ const ManageRequest = () => {
       console.error("Error rejecting request:", error);
       alert("An error occurred while rejecting the request.");
     }
+  };
+
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    const filtered = requests.filter(
+      (req) =>
+        req.first_name.toLowerCase().includes(query) ||
+        req.last_name.toLowerCase().includes(query) ||
+        req.email.toLowerCase().includes(query)
+    );
+
+    setFilteredRequests(filtered);
   };
 
   const handleBack = () => {
@@ -82,15 +101,27 @@ const ManageRequest = () => {
     <div className="bg-[#F5F5F5] min-h-screen py-8 px-6 flex flex-col items-center">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h1 className="text-3xl font-poppins font-bold text-[#003366] text-center mb-8">
-          Manage Participation Requests
+          Participation Requests
         </h1>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by name or email"
+          value={searchQuery}
+          onChange={handleSearch}
+          className="w-full px-4 py-2 mb-6 border rounded-lg text-gray-700 font-roboto focus:outline-none focus:ring-2 focus:ring-[#003366]"
+        />
 
         {isLoading ? (
           <p className="text-gray-600 font-roboto text-center">Loading requests...</p>
-        ) : requests.length > 0 ? (
+        ) : filteredRequests.length > 0 ? (
           <ul className="space-y-4">
-            {requests.map((request) => (
-              <li key={request.voter_id} className="bg-[#FFFFFF] p-6 rounded-lg shadow-md flex justify-between items-center">
+            {filteredRequests.map((request) => (
+              <li
+                key={request.voter_id}
+                className="bg-[#FFFFFF] p-6 rounded-lg shadow-md flex justify-between items-center"
+              >
                 <div>
                   <p className="text-lg font-roboto font-semibold text-[#003366]">
                     {request.first_name} {request.last_name}
@@ -116,7 +147,7 @@ const ManageRequest = () => {
           </ul>
         ) : (
           <p className="text-gray-600 font-roboto text-center">
-            No pending participation requests found for this election.
+            No matching requests found.
           </p>
         )}
 
