@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Settings, Users, BarChart2, Home } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const ElectionDetail = () => {
   const { userId, electionId } = useParams();
   const [election, setElection] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [acceptedVoters, setAcceptedVoters] = useState([]);
   const [electionEnded, setElectionEnded] = useState(false);
   const [electionResults, setElectionResults] = useState(false);
@@ -18,6 +18,8 @@ const ElectionDetail = () => {
   const [electionParticipation, setElectionParticipation] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     const fetchElectionDetails = async () => {
@@ -26,6 +28,9 @@ const ElectionDetail = () => {
         const result = await response.json();
         if (response.ok) {
           setElection(result.election);
+          setStartDate(new Date(result.election.start_datetime).toLocaleString());
+          setEndDate(new Date(result.election.end_datetime).toLocaleString());
+  
           const electionEndDate = new Date(result.election.end_datetime);
           const currentDate = new Date();
           if (currentDate > electionEndDate) {
@@ -79,9 +84,6 @@ const ElectionDetail = () => {
     fetchElectionResults();
   }, [userId, electionId, electionEnded]);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
   const handleDelete = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this election? This action cannot be undone."
@@ -105,139 +107,116 @@ const ElectionDetail = () => {
   };
 
   const handleLaunchResults = async () => {
-    setIsLoading(true); // Set loading state to true
-    try {
-      const response = await fetch(`${apiUrl}/api/results/${userId}/${electionId}/generate`);
-      const result = await response.json();
-      if (response.ok) {
-        setElectionResults(result);
-        setResultsLaunched(true);
-        alert("Election results have been successfully generated!");
-        window.location.reload();
-      } else {
-        alert("Failed to generate election results.");
+      setIsLoading(true); // Set loading state to true
+      try {
+        const response = await fetch(`${apiUrl}/api/results/${userId}/${electionId}/generate`);
+        const result = await response.json();
+        if (response.ok) {
+          setElectionResults(result);
+          setResultsLaunched(true);
+          alert("Election results have been successfully generated!");
+          window.location.reload();
+        } else {
+          alert("Failed to generate election results.");
+        }
+      } catch (error) {
+        console.error("Error fetching election results:", error);
+        alert("An error occurred while fetching the election results.");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching election results:", error);
-      alert("An error occurred while fetching the election results.");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center py-8 px-4">
-      {election ? (
-        <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8">
-          <div className="flex justify-between mb-6 items-center">
-            <Link to={`/dashboard/${userId}`} className="flex items-center text-gray-700">
-              <ChevronLeft className="mr-2" />
-              Back to Dashboard
-            </Link>
-            <div className="space-x-4">
-              <button
-                onClick={() => navigate(`/election/${userId}/update/${electionId}`)}
-                className="bg-[#00897B] text-white p-2 rounded font-roboto hover:bg-[#00695C]"
-              >
-                Update
-              </button>
-              <button
-                onClick={handleDelete}
-                className="bg-[#D32F2F] text-white p-2 rounded font-roboto hover:bg-[#B71C1C]"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-poppins font-bold text-[#003366] mb-4">
-            {election.title}'s Dashboard
-          </h1>
-          <p className="text-sm text-gray-600 font-roboto mb-4">
-            <strong>Code:</strong> {election.election_code}
-          </p>
-          <p className="text-gray-700 font-roboto mb-4">{election.description}</p>
-          <p className="text-gray-700 font-roboto mb-2">
-            <strong>Start Date and Time:</strong>{" "}
-            {new Date(election.start_datetime).toLocaleString("en-MY", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })}
-          </p>
-          <p className="text-gray-700 font-roboto mb-6">
-            <strong>End Date and Time:</strong>{" "}
-            {new Date(election.end_datetime).toLocaleString("en-MY", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })}
-          </p>
-
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-            <h2
-              className="text-xl font-semibold text-[#003366] cursor-pointer hover:underline flex items-center"
-              onClick={openModal}
+    <div className="flex h-screen bg-[#F5F5F5]">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-[#003366] text-white flex flex-col p-6">
+        <h2 className="text-xl font-bold mb-6">Election Dashboard</h2>
+        <nav className="space-y-4 mb-6">
+          <button
+            className={`flex items-center w-full p-3 rounded-md ${activeTab === "overview" ? "bg-[#004080]" : "hover:bg-[#004080]"}`}
+            onClick={() => setActiveTab("overview")}
+          >
+            <Home className="mr-2" />
+            Overview
+          </button>
+          <button
+            className={`flex items-center w-full p-3 rounded-md ${activeTab === "voters" ? "bg-[#004080]" : "hover:bg-[#004080]"}`}
+            onClick={() => setActiveTab("voters")}
+          >
+            <Users className="mr-2" />
+            Voters
+          </button>
+          {electionEnded && (
+            <button
+              className={`flex items-center w-full p-3 rounded-md ${activeTab === "results" ? "bg-[#004080]" : "hover:bg-[#004080]"}`}
+              onClick={() => setActiveTab("results")}
             >
-              List of Accepted Voters {'>'}
-            </h2>
-              <button
-                onClick={() => navigate(`/election/${userId}/manage-requests/${electionId}`)}
-                className="bg-[#003366] text-white p-2 rounded font-roboto hover:bg-[#0a1622]"
-              >
-                Manage Requests
-              </button>
-            </div>
-            {isModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                <div className="bg-white w-[90%] md:w-1/3 rounded-lg shadow-lg p-6 relative">
-                  {/* Close Button (X) */}
-                  <button
-                    onClick={closeModal}
-                    className="absolute top-3 right-3 text-[#003366] hover:text-[#002244] text-lg font-semibold"
-                  >
-                    &times;
-                  </button>
+              <BarChart2 className="mr-2" />
+              Results
+            </button>
+          )}
+          <button
+            className={`flex items-center w-full p-3 rounded-md ${activeTab === "settings" ? "bg-[#004080]" : "hover:bg-[#004080]"}`}
+            onClick={() => setActiveTab("settings")}
+          >
+            <Settings className="mr-2" />
+            Settings
+          </button>
+        </nav>
 
-                  {/* Modal Content */}
-                  <h2 className="text-xl font-semibold mb-4 text-[#003366]">List of Accepted Voters</h2>
-                  <div className="max-h-60 overflow-y-auto">
-                    {acceptedVoters.length > 0 ? (
-                      <ul className="space-y-2">
-                        {acceptedVoters.map((voter) => (
-                          <li
-                            key={voter.voter_id}
-                            className="p-4 bg-[#F5F5F5] rounded-md shadow-sm"
-                          >
-                            <p className="font-roboto">
-                              <strong>Name:</strong> {voter.first_name} {voter.last_name}
-                            </p>
-                            <p className="font-roboto">
-                              <strong>Email:</strong> {voter.email}
-                            </p>
-                            <p className="font-roboto">
-                              <strong>Username:</strong> {voter.username}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-gray-600 font-roboto">No accepted voters yet.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+        {/* Start and End Date */}
+        {election && (
+          <div className="mt-6 text-sm">
+            <p><strong>Start:</strong> {startDate}</p>
+            <p><strong>End:</strong> {endDate}</p>
           </div>
+        )}
 
-          <div className="space-y-4">
+        {/* Back to Dashboard Button */}
+        <button onClick={() => navigate(`/dashboard/${userId}`)} className="mt-4 bg-gray-200 text-[#003366] px-4 py-2 rounded-md">
+          Back to Dashboard
+        </button>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 p-8">
+        {activeTab === "overview" && election && (
+          <div>
+            <h1 className="text-3xl font-bold text-[#003366] mb-4">{election.title} Overview</h1>
+            <p className="text-gray-700 font-roboto mb-4">{election.election_code}</p>
+            <p className="text-gray-700 font-roboto mb-4">{election.description}</p>
+
+            {/* Display Start and End Date */}
+            <p className="text-lg"><strong>Start Date:</strong> {startDate}</p>
+            <p className="text-lg"><strong>End Date:</strong> {endDate}</p>
+          </div>
+        )}
+
+        {activeTab === "voters" && (
+          <div>
+            <h2 className="text-2xl font-semibold text-[#003366] mb-4">Accepted Voters</h2>
+            <button
+              onClick={() => navigate(`/election/${userId}/manage-requests/${electionId}`)}
+              className="bg-[#003366] text-white p-2 rounded font-roboto hover:bg-[#0a1622]"
+            >
+              Manage Requests
+            </button>
+            <ul>
+              {acceptedVoters.map((voter) => (
+                <li key={voter.voter_id} className="p-2 bg-gray-100 mb-2 rounded">
+                  {voter.first_name} {voter.last_name} ({voter.email})
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {activeTab === "results" && (
+          <div>
+            <h2 className="text-2xl font-bold text-[#003366] mb-4">Election Results</h2>
+
+            {/* Show Launch Results Button Only if Results Are Not Launched */}
             {electionEnded && !resultsLaunched && (
               <button
                 onClick={handleLaunchResults}
@@ -246,29 +225,72 @@ const ElectionDetail = () => {
                 {isLoading ? "Loading..." : "Launch Results"}
               </button>
             )}
-          </div>
 
-          {electionResults && (
-            <div className="mt-8">
-              <h3 className="text-xl font-bold text-[#003366] mb-4">Election Results</h3>
-              <p className="text-sm text-gray-600 font-roboto mb-2">
-                <strong>Winner: </strong>{winner}
-              </p>
-              <p className="text-sm text-gray-600 font-roboto mb-2">
-                <strong>Total Votes: </strong>{totalVotes}
-              </p>
-              <p className="text-sm text-gray-600 font-roboto">
-                <strong>Winning Percentage: </strong>{Math.floor(votesPercent)}%
-              </p>
-              <p className="text-sm text-gray-600 font-roboto mt-4">
-                <strong>Election Participation: </strong>{electionParticipation} Voter/s
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <p>Loading election details...</p>
-      )}
+            {/* Show Results Only If They Have Been Launched */}
+            {resultsLaunched && (
+              <div>
+                <p><strong>Winner:</strong> {winner}</p>
+                <p><strong>Total Votes:</strong> {totalVotes}</p>
+                <p><strong>Winning Percentage:</strong> {Math.floor(votesPercent)}%</p>
+                <p><strong>Participation:</strong> {electionParticipation} Voter(s)</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "settings" && (
+          <div>
+            <h2 className="text-2xl font-semibold text-[#003366] mb-4">Settings</h2>
+
+            {/* Election Information Table */}
+            <table className="w-full border-collapse border border-gray-300 mb-4">
+              <tbody>
+                <tr className="bg-gray-100">
+                  <td className="border border-gray-300 bg-[#003366] text-white px-4 py-2 font-bold">Title:</td>
+                  <td className="border border-gray-300 px-4 py-2">{election.title}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 bg-[#003366] text-white px-4 py-2 font-bold">Description:</td>
+                  <td className="border border-gray-300 px-4 py-2">{election.description}</td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="border border-gray-300 bg-[#003366] text-white px-4 py-2 font-bold">Start Date:</td>
+                  <td className="border border-gray-300 px-4 py-2">{startDate}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 bg-[#003366] text-white px-4 py-2 font-bold">End Date:</td>
+                  <td className="border border-gray-300 px-4 py-2">{endDate}</td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="border border-gray-300 bg-[#003366] text-white px-4 py-2 font-bold">Options:</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    <ul className="list-disc ml-4">
+                      {election.options.map((option, index) => (
+                        <li key={index}>{option.name} - {option.description}</li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Edit & Delete Buttons */}
+            <button
+              onClick={() => navigate(`/election/${userId}/update/${electionId}`)}
+              className="bg-green-600 text-white px-4 py-2 rounded mr-2"
+            >
+              Edit
+            </button>
+            <button
+              onClick={handleDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 };
