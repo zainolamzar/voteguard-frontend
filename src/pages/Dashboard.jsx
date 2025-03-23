@@ -6,11 +6,27 @@ const apiUrl = import.meta.env.VITE_BE_URL;
 const Dashboard = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
   const [elections, setElections] = useState([]);
   const [joinedElections, setJoinedElections] = useState([]);
   const [tab, setTab] = useState("all"); // Tab for filtering elections
 
   useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/users/${userId}`);
+        const result = await response.json();
+        if (response.ok) {
+          setUsername(result.data.username);
+        } else {
+          alert("Failed to fetch user details.");
+        }
+      } catch (error) {
+        console.error("Error fetching username:", error);
+        alert("An error occurred while fetching user details.");
+      }
+    };
+    
     const fetchElections = async () => {
       try {
         const response = await fetch(`${apiUrl}/api/elections/${userId}/election`);
@@ -41,6 +57,7 @@ const Dashboard = () => {
       }
     };
 
+    fetchUsername();
     fetchElections();
     fetchJoinedElections();
   }, [userId]);
@@ -130,10 +147,15 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="bg-[#003366] w-full text-white p-6 flex justify-between items-center">
+      <div className="bg-[#003366] w-full text-white p-6 flex justify-between items-center relative">
         <div className="flex justify-center items-center w-full">
           <img src="/src/assets/main-logo.png" alt="Logo" className="h-12 w-auto rounded-full border-4 border-white bg-white" />
         </div>
+        <button
+          className="absolute right-[10%] px-4 py-2 text-white bg-transparent hover:text-[#a3a3a3]"
+        >
+          {username}
+        </button>
         <button
           onClick={handleLogout}
           className="absolute right-6 px-4 py-2 text-white bg-[#D32F2F] hover:text-white hover:bg-[#541212]"

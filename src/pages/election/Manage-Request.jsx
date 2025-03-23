@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const ManageRequest = () => {
-  const { userId, electionId } = useParams(); // Get userId and electionId from URL
+  const { userId, electionId } = useParams();
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]); // State to hold the list of voter requests
   const [filteredRequests, setFilteredRequests] = useState([]); // State to hold filtered requests
@@ -79,6 +79,48 @@ const ManageRequest = () => {
     }
   };
 
+  const handleApproveAll = async () => {
+    try {
+      await Promise.all(
+        filteredRequests.map((request) =>
+          fetch(
+            `${apiUrl}/api/voters/${userId}/requests/${electionId}/approve/${request.voter_id}`,
+            { method: "PUT" }
+          )
+        )
+      );
+  
+      // Update the state after batch operation
+      setRequests(requests.filter((req) => !filteredRequests.includes(req)));
+      setFilteredRequests([]);
+      alert("All requests are successfully accepted.");
+    } catch (error) {
+      console.error("Error approving all requests:", error);
+      alert("An error occurred while approving all requests.");
+    }
+  };
+  
+  const handleRejectAll = async () => {
+    try {
+      await Promise.all(
+        filteredRequests.map((request) =>
+          fetch(
+            `${apiUrl}/api/voters/${userId}/requests/${electionId}/reject/${request.voter_id}`,
+            { method: "PUT" }
+          )
+        )
+      );
+  
+      // Update the state after batch operation
+      setRequests(requests.filter((req) => !filteredRequests.includes(req)));
+      setFilteredRequests([]);
+      alert("All requests are successfully rejected.");
+    } catch (error) {
+      console.error("Error rejecting all requests:", error);
+      alert("An error occurred while rejecting all requests.");
+    }
+  };
+
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
@@ -104,14 +146,30 @@ const ManageRequest = () => {
           Participation Requests
         </h1>
 
-        {/* Search Bar */}
-        <input
-          type="text"
-          placeholder="Search by name or email"
-          value={searchQuery}
-          onChange={handleSearch}
-          className="w-full px-4 py-2 mb-6 border rounded-lg text-gray-700 font-roboto focus:outline-none focus:ring-2 focus:ring-[#003366]"
-        />
+        {/* Search Bar with Accept All and Reject All Buttons */}
+        <div className="flex items-center justify-between mb-6">
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            value={searchQuery}
+            onChange={handleSearch}
+            className="w-[62%] px-4 py-2 border rounded-lg text-gray-700 font-roboto focus:outline-none focus:ring-2 focus:ring-[#003366]"
+          />
+          <div className="ml-4 flex space-x-4">
+            <button
+              className="px-6 py-2 bg-[#00897B] text-white font-roboto rounded-lg hover:bg-[#00695C] focus:outline-none"
+              onClick={handleApproveAll}
+            >
+              Accept All
+            </button>
+            <button
+              className="px-6 py-2 bg-[#D32F2F] text-white font-roboto rounded-lg hover:bg-[#B71C1C] focus:outline-none"
+              onClick={handleRejectAll}
+            >
+              Reject All
+            </button>
+          </div>
+        </div>
 
         {isLoading ? (
           <p className="text-gray-600 font-roboto text-center">Loading requests...</p>

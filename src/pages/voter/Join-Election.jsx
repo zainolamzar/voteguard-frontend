@@ -5,8 +5,8 @@ const apiUrl = import.meta.env.VITE_BE_URL;
 
 const JoinElection = () => {
   const { userId } = useParams();
-  const navigate = useNavigate(); // Hook for navigation
-  const [electionCode, setElectionCode] = useState(""); // State to hold the election code
+  const navigate = useNavigate();
+  const [electionCode, setElectionCode] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
