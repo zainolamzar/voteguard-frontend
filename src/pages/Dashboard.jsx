@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid"; 
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const Dashboard = () => {
@@ -92,7 +94,9 @@ const Dashboard = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar Navigation */}
       <div className="w-64 bg-[#003366] text-white flex flex-col items-start p-6">
-        <img src="/src/assets/main-logo.png" alt="Logo" className="h-16 w-auto mb-6" />
+        <div className="mb-[20%] mt-4 flex w-full justify-center">
+          <h1 className="text-2xl font-semibold">Hi, {username}!</h1>
+        </div>
         <button
           className={`w-full text-left py-3 px-4 rounded ${activeSection === "myElections" ? "bg-[#0059b3]" : ""}`}
           onClick={() => setActiveSection("myElections")}
@@ -107,16 +111,21 @@ const Dashboard = () => {
         </button>
         <button
           onClick={handleLogout}
-          className="mt-auto w-full py-3 px-4 bg-[#D32F2F] hover:bg-[#541212] rounded"
+          className="mt-auto w-full py-3 px-4 bg-[#D32F2F] hover:bg-[#541212] rounded flex items-center justify-center gap-2"
         >
+          <ArrowLeftOnRectangleIcon className="w-5 h-5 text-white" />
           Logout
         </button>
       </div>
 
       {/* Main Content */}
       <div className="flex-1">
-        <div className="bg-[#003366] w-full text-white p-6 flex justify-center">
-          <h1 className="text-2xl font-semibold">Welcome, {username}!</h1>
+        <div className="bg-[#c4dcff] w-full text-white p-6 flex justify-center">
+          <img
+            src="/src/assets/second-logo.png"
+            alt="Voteguard Logo"
+            className="h-16 w-auto drop-shadow-[0px_0px_8px_white] drop-shadow-[0px_0px_1px_white]"
+          />
         </div>
 
         <div className="p-8">

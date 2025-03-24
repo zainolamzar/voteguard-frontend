@@ -10,6 +10,7 @@ const ElectionDetail = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [acceptedVoters, setAcceptedVoters] = useState([]);
   const [electionEnded, setElectionEnded] = useState(false);
+  const [electionStatus, setElectionStatus] = useState("");
   const [electionResults, setElectionResults] = useState(false);
   const [resultsLaunched, setResultsLaunched] = useState(false);
   const [winner, setWinnerName] = useState();
@@ -36,6 +37,9 @@ const ElectionDetail = () => {
           if (currentDate > electionEndDate) {
             setElectionEnded(true);
           }
+
+          // Call status update after setting the state
+          updateElectionStatus(result.election.start_datetime, result.election.end_datetime);
         } else {
           alert("Failed to fetch election details.");
         }
@@ -83,6 +87,16 @@ const ElectionDetail = () => {
     fetchAcceptedVoters();
     fetchElectionResults();
   }, [userId, electionId, electionEnded]);
+
+  const updateElectionStatus = (start, end) => {
+    const now = new Date();
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+  
+    if (now < startDate) setElectionStatus("In Process");
+    else if (now >= startDate && now <= endDate) setElectionStatus("Ongoing");
+    else setElectionStatus("Ended");
+  };
 
   const handleDelete = async () => {
     const confirmDelete = window.confirm(
@@ -153,7 +167,7 @@ const ElectionDetail = () => {
               onClick={() => setActiveTab("results")}
             >
               <BarChart2 className="mr-2" />
-              Results
+              Result
             </button>
           )}
           <button
@@ -183,7 +197,28 @@ const ElectionDetail = () => {
       <div className="flex-1 p-8">
         {activeTab === "overview" && election && (
           <div>
-            <h1 className="text-3xl font-bold text-[#003366] mb-4">{election.title} Overview</h1>
+            <div className="flex items-center gap-4 mb-4">
+              {/* Election Title */}
+              <h1 className="text-3xl font-bold text-[#003366] whitespace-nowrap">
+                {election.title} Overview
+              </h1>
+
+              {/* Election Status */}
+              <span
+                className={`px-3 py-1 rounded text-white font-medium text-sm
+                  ${
+                    electionStatus === "Ongoing"
+                      ? "bg-green-500"
+                      : electionStatus === "In Process"
+                      ? "bg-yellow-500"
+                      : electionStatus === "Ended"
+                      ? "bg-red-500"
+                      : "bg-gray-500"
+                  }`}
+              >
+                {electionStatus}
+              </span>
+            </div>
             <p className="text-gray-700 font-roboto mb-4">{election.election_code}</p>
             <p className="text-gray-700 font-roboto mb-4">{election.description}</p>
 
