@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Notification from "@/components/ui/notification";
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
@@ -158,106 +159,129 @@ const Dashboard = () => {
           {notification && (
             <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
           )}
-          
-          {activeSection === "myElections" && (
-            <>
-              <h2 className="text-2xl font-semibold text-center mb-6">My Elections</h2>
 
-              {/* Election Status Tabs */}
-              <div className="flex justify-center space-x-4 mb-6">
-                {["all", "ongoing", "in process", "ended"].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setTab(status)}
-                    className={`px-4 py-2 rounded transition ${
-                      tab === status
-                        ? "bg-[#003366] text-white"
-                        : "bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-gray-100"
-                    }`}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
+            {activeSection === "myElections" && (
+              <>
+                <h2 className="text-2xl font-semibold text-center mb-6">My Elections</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div onClick={() => navigate(`/election-form/${userId}`)}
-                            className="bg-[#003366] hover:bg-[#112a43] text-white p-6 rounded-lg shadow-lg cursor-pointer">
-                            <h3 className="text-xl font-semibold">Create New Election</h3>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            Add new election
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-
-                {filterElections(elections).map((election) => {
-                  const status = getStatus(election.start_datetime, election.end_datetime);
-                  const bgColor = status === "Ongoing" ? "bg-[#00897B]" 
-                                : status === "In Process" ? "bg-[#FFC107]" 
-                                : "bg-[#D32F2F]";
-
-                  return (
-                    <div
-                      key={election.election_id}
-                      onClick={() => navigate(`/election/${userId}/detail/${election.election_id}`)}
-                      className={`${bgColor} text-white p-6 rounded-lg shadow-lg cursor-pointer`}
+                {/* Election Status Tabs */}
+                <div className="flex justify-center space-x-4 mb-6">
+                  {["all", "ongoing", "in process", "ended"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setTab(status)}
+                      className={`px-4 py-2 rounded transition ${
+                        tab === status
+                          ? "bg-[#003366] text-white"
+                          : "bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-gray-100"
+                      }`}
                     >
-                      <h3 className="text-xl font-semibold">{election.title}</h3>
-                      <p className="text-gray-100">Due: {new Date(election.end_datetime).toLocaleString()}</p>
-                      <p className="mt-2 text-sm font-medium">{status}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                  ))}
+                </div>
 
-          {activeSection === "joinedElections" && (
-            <>
-              <h2 className="text-2xl font-semibold text-center mb-6">Joined Elections</h2>
+                <ScrollArea className="h-72 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <TooltipProvider>
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div onClick={() => navigate(`/election-form/${userId}`)}
+                              className="bg-[#003366] hover:bg-[#112a43] text-white p-6 rounded-lg shadow-lg cursor-pointer">
+                              <h3 className="text-xl font-semibold">Create New Election</h3>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                              Add new election
+                          </TooltipContent>
+                      </Tooltip>
+                  </TooltipProvider>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filterElections(elections).map((election) => {
+                    const status = getStatus(election.start_datetime, election.end_datetime);
+                    const bgColor = status === "Ongoing" ? "bg-[#00897B]" 
+                                  : status === "In Process" ? "bg-[#FFC107]" 
+                                  : "bg-[#D32F2F]";
 
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div onClick={() => navigate(`/voter/join/${userId}`)}
-                            className="bg-[#003366] hover:bg-[#112a43] text-white p-6 rounded-lg shadow-lg cursor-pointer">
-                            <h3 className="text-xl font-semibold">Join Election</h3>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            Join an election
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                    return (
+                      <div
+                        key={election.election_id}
+                        onClick={() => navigate(`/election/${userId}/detail/${election.election_id}`)}
+                        className={`${bgColor} text-white p-6 rounded-lg shadow-lg cursor-pointer 
+                          transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl`}
+                      >
+                        <h3 className="text-xl font-semibold">{election.title}</h3>
+                        <p className="text-gray-100">Due: {new Date(election.end_datetime).toLocaleString()}</p>
+                        <p className="mt-2 text-sm font-medium">{status}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                </ScrollArea>
+              </>
+            )}
 
-                {filterElections(joinedElections).map((election) => {
-                  const status = getStatus(election.start_datetime, election.end_datetime);
-                  const bgColor = status === "Ongoing" ? "bg-[#00897B]" 
-                                : status === "In Process" ? "bg-[#FFC107]" 
-                                : "bg-[#D32F2F]";
+            {activeSection === "joinedElections" && (
+              <>
+                <h2 className="text-2xl font-semibold text-center mb-6">Joined Elections</h2>
 
-                  return (
-                    <div
-                      key={election.election_id}
-                      onClick={() => navigate(`/election/${userId}/join/${election.voter_id}/${election.election_id}/detail`)}
-                      className={`${bgColor} text-white p-6 rounded-lg shadow-lg cursor-pointer`}
+                {/* Election Status Tabs */}
+                <div className="flex justify-center space-x-4 mb-6">
+                  {["all", "ongoing", "in process", "ended"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setTab(status)}
+                      className={`px-4 py-2 rounded transition ${
+                        tab === status
+                          ? "bg-[#003366] text-white"
+                          : "bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-gray-100"
+                      }`}
                     >
-                      <h3 className="text-xl font-semibold">{election.title}</h3>
-                      <p className="text-gray-100">Due: {new Date(election.end_datetime).toLocaleString()}</p>
-                      <p className="mt-2 text-sm font-medium">{status}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                <ScrollArea className="h-[24rem] w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                  <TooltipProvider>
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div onClick={() => navigate(`/voter/join/${userId}`)}
+                              className="bg-[#003366] hover:bg-[#112a43] text-white p-6 rounded-lg shadow-lg cursor-pointer">
+                              <h3 className="text-xl font-semibold">Join Election</h3>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                              Join an election
+                          </TooltipContent>
+                      </Tooltip>
+                  </TooltipProvider>
+
+                  {filterElections(joinedElections).map((election) => {
+                    const status = getStatus(election.start_datetime, election.end_datetime);
+                    const bgColor = status === "Ongoing" ? "bg-[#00897B]" 
+                                  : status === "In Process" ? "bg-[#FFC107]" 
+                                  : "bg-[#D32F2F]";
+
+                    return (
+                      <div
+                        key={election.election_id}
+                        onClick={() => navigate(`/election/${userId}/join/${election.voter_id}/${election.election_id}/detail`)}
+                        className={`${bgColor} text-white p-6 rounded-lg shadow-lg cursor-pointer 
+                          transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl`}
+                      >
+                        <h3 className="text-xl font-semibold">{election.title}</h3>
+                        <p className="text-gray-100">Due: {new Date(election.end_datetime).toLocaleString()}</p>
+                        <p className="mt-2 text-sm font-medium">{status}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                </ScrollArea>
+              </>
+            )}
         </div>
       </div>
     </div>

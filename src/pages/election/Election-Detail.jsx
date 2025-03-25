@@ -68,14 +68,12 @@ const ElectionDetail = () => {
       try {
         const response = await fetch(`${apiUrl}/api/voters/${userId}/requests/${electionId}`);
         const result = await response.json();
-  
+    
         if (response.ok) {
-          // Filter pending requests
-          const pending = result.requests.filter(req => req.status === "pending").length;
-          setPendingRequests(pending);
+          setPendingRequests(result.requests.length);
         } else {
           setNotification({ 
-            message: `Error: ${result.message}`, 
+            message: `Error: ${result.message || "Failed to fetch pending requests"}`, 
             type: "error" 
           });
         }
@@ -86,7 +84,7 @@ const ElectionDetail = () => {
           type: "error" 
         });
       }
-    };
+    };    
 
     const fetchAcceptedVoters = async () => {
       try {
@@ -360,7 +358,7 @@ const ElectionDetail = () => {
             <p className="text-gray-700 font-roboto mb-[2.5rem] text-[1.2rem]"><strong>Description:</strong> {election.description}</p>
             
             
-            <div className="grid grid-cols-5 grid-rows-5 gap-2">
+            <div className="grid grid-cols-5 grid-rows-2 gap-2">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -463,17 +461,27 @@ const ElectionDetail = () => {
 
         {activeTab === "voters" && (
           <div>
-            <h2 className="text-2xl font-semibold text-[#003366] mb-4">Accepted Voters</h2>
+            {/* Header Section */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-[#003366]">Accepted Voters</h2>
 
-            {!electionStatus.includes("Ongoing") && !electionStatus.includes("Ended") && (
-              <button
-                onClick={() => navigate(`/election/${userId}/manage-requests/${electionId}`)}
-                className="bg-[#003366] text-white p-2 rounded font-roboto hover:bg-[#0a1622] mb-4"
-              >
-                Manage Requests
-              </button>
-            )}
+              {!electionStatus.includes("Ongoing") && !electionStatus.includes("Ended") && (
+                <button
+                  onClick={() => navigate(`/election/${userId}/manage-requests/${electionId}`)}
+                  className="bg-[#003366] text-white px-4 py-2 rounded flex items-center gap-2 font-roboto 
+                            hover:bg-[#0a1622] transition"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                  </svg>
 
+                  Manage Requests
+                </button>
+              )}
+            </div>
+
+            {/* Table Section */}
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
@@ -513,12 +521,61 @@ const ElectionDetail = () => {
 
             {/* Show Results Only If They Have Been Launched */}
             {resultsLaunched && (
-              <div>
-                <p><strong>Winner:</strong> {winner}</p>
-                <p><strong>Total Votes:</strong> {totalVotes}</p>
-                <p><strong>Winning Percentage:</strong> {Math.floor(votesPercent)}%</p>
-                <p><strong>Participation:</strong> {electionParticipation} Voter(s)</p>
+              <div className="grid grid-cols-4 grid-rows-3 gap-3">
+                  <div className="col-span-2 bg-[#004080] hover:bg-[#002855] transition text-white 
+                                  rounded-lg p-2 text-center shadow-md flex flex-col 
+                                  items-center justify-center w-full h-full">
+                    <p className="text-xl font-bold w-full">
+                      <strong>Winner:</strong> {winner}
+                    </p>
+                  </div>
+
+                  <div className="col-span-2 col-start-3 bg-[#004080] hover:bg-[#002855] transition text-white 
+                                  rounded-lg p-2 text-center shadow-md flex flex-col 
+                                  items-center justify-center w-full h-full">
+                    <p className="text-xl font-bold w-full">
+                      <strong>Total Votes:</strong> {totalVotes}
+                    </p>
+                  </div>
+                  <div className="col-span-2 row-span-2 row-start-2 bg-[#004080] hover:bg-[#002855] transition text-white rounded-lg p-4 shadow-md flex items-center justify-center space-x-4">
+                    {/* SVG Half-Circle Progress Bar */}
+                    <svg width="100" height="60" viewBox="0 0 120 60">
+                      <defs>
+                        <linearGradient id="progressGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#FFD700" />
+                          <stop offset="100%" stopColor="#FFA500" />
+                        </linearGradient>
+                      </defs>
+                      
+                      {/* Background Arc */}
+                      <path d="M10,50 A50,50 0 0,1 110,50" stroke="#333" strokeWidth="8" fill="none" />
+                      
+                      {/* Progress Arc */}
+                      <path 
+                        d="M10,50 A50,50 0 0,1 110,50"
+                        stroke="url(#progressGradient)" 
+                        strokeWidth="8"
+                        fill="none"
+                        strokeDasharray="157"
+                        strokeDashoffset={157 - (157 * votesPercent) / 100} 
+                        strokeLinecap="round"
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+
+                    {/* Winning Percentage Text */}
+                    <p className="text-lg font-semibold"><strong>Winning Percentage:</strong> {Math.floor(votesPercent)}%</p>
+                  </div>
+                  <div className="col-span-2 row-span-2 col-start-3 row-start-2 
+                                  bg-[#004080] hover:bg-[#002855] transition text-white 
+                                  rounded-lg p-2 text-center shadow-md flex flex-col 
+                                  items-center justify-center w-full h-full">
+                    <p className="text-lg font-semibold w-full">
+                      <strong>Participation:</strong> {electionParticipation} Voter(s)
+                    </p>
+                  </div>
               </div>
+    
             )}
           </div>
         )}
