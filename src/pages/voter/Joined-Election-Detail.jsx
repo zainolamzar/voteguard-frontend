@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Users, BarChart2, Home } from "lucide-react";
+import Notification from "@/components/ui/notification";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -9,7 +10,7 @@ const JoinedElectionDetail = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
   const [election, setElection] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [acceptedVoters, setAcceptedVoters] = useState([]);
   const [vote, setVote] = useState("");
   const [error, setError] = useState("");
@@ -86,7 +87,10 @@ const JoinedElectionDetail = () => {
         setAcceptedVoters(result.acceptedVoters);
       } catch (error) {
         console.error("Error fetching accepted voters:", error);
-        alert("An error occurred while fetching accepted voters.");
+        setNotification({ 
+          message: "An error occurred while fetching accepted voters.", 
+          type: "error" 
+        });
       }
     };
 
@@ -128,7 +132,10 @@ const JoinedElectionDetail = () => {
 
   const handleVoteSubmit = async () => {
     if (!vote) {
-      alert("Please select a vote option.");
+      setNotification({ 
+        message: "Please select a vote option.", 
+        type: "error" 
+      });
       return;
     }
 
@@ -155,7 +162,10 @@ const JoinedElectionDetail = () => {
       }
     } catch (error) {
       console.error("Error submitting vote:", error);
-      alert("An error occurred while submitting your vote.");
+      setNotification({ 
+        message: "An error occurred while submitting your vote.", 
+        type: "error" 
+      });
     } finally {
       setLoading(false);
     }
@@ -212,13 +222,17 @@ const JoinedElectionDetail = () => {
       )}
 
       {/* Back to Dashboard Button */}
-      <button onClick={() => navigate(`/dashboard/${userId}`)} className="mt-4 bg-gray-200 text-[#003366] px-4 py-2 rounded-md">
+      <button onClick={() => navigate(`/dashboard/${userId}`)} className="mt-4 bg-gray-200 text-[#003366] hover:bg-gray-400 hover:text-white transition px-4 py-2 rounded-md">
         Back to Dashboard
       </button>
     </aside>
 
     {/* Main Content */}
     <div className="flex-1 p-8">
+      {notification && (
+        <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+      
       {activeTab === "overview" && election && (
         <div>
           <div className="flex items-center gap-4 mb-4">
@@ -254,31 +268,31 @@ const JoinedElectionDetail = () => {
 
       {activeTab === "voters" && (
         <div>
-        <h2 className="text-xl font-semibold mb-4 text-[#003366]">List of Voters</h2>
-        <div className="max-h-60 overflow-y-auto">
-          {acceptedVoters.length > 0 ? (
-            <ul className="space-y-2">
-              {acceptedVoters.map((voter) => (
-                <li
-                  key={voter.voter_id}
-                  className="p-4 bg-[#F5F5F5] rounded-md shadow-sm"
-                >
-                  <p className="font-roboto">
-                    <strong>Name:</strong> {voter.first_name} {voter.last_name}
-                  </p>
-                  <p className="font-roboto">
-                    <strong>Email:</strong> {voter.email}
-                  </p>
-                  <p className="font-roboto">
-                    <strong>Username:</strong> {voter.username}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-600 font-roboto">No accepted voters yet.</p>
-          )}
-        </div>
+          <h2 className="text-xl font-semibold mb-4 text-[#003366]">List of Voters</h2>
+          <div className="max-h-60 overflow-y-auto border border-gray-300 rounded-md shadow-md">
+            {acceptedVoters.length > 0 ? (
+              <table className="w-full border-collapse">
+                <thead className="bg-[#003366] text-white">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Name</th>
+                    <th className="px-4 py-2 text-left">Username</th>
+                    <th className="px-4 py-2 text-left">Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {acceptedVoters.map((voter, index) => (
+                    <tr key={voter.voter_id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                      <td className="border px-4 py-2">{voter.first_name} {voter.last_name}</td>
+                      <td className="border px-4 py-2">{voter.username}</td>
+                      <td className="border px-4 py-2">{voter.email}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-600 font-roboto p-4">No accepted voters yet.</p>
+            )}
+          </div>
         </div>
       )}
 

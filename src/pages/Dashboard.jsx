@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid"; 
+import Notification from "@/components/ui/notification";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const Dashboard = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const [notification, setNotification] = useState(null);
   const [username, setUsername] = useState("");
   const [elections, setElections] = useState([]);
   const [joinedElections, setJoinedElections] = useState([]);
@@ -22,11 +24,17 @@ const Dashboard = () => {
         if (response.ok) {
           setUsername(result.data.username);
         } else {
-          alert("Failed to fetch user details.");
+          setNotification({ 
+            message: "Failed to fetch user details.", 
+            type: "error" 
+          });
         }
       } catch (error) {
         console.error("Error fetching username:", error);
-        alert("An error occurred while fetching user details.");
+        setNotification({ 
+          message: "An error occurred while fetching user details.", 
+          type: "error" 
+        });
       }
     };
 
@@ -37,11 +45,17 @@ const Dashboard = () => {
         if (response.ok) {
           setElections(result);
         } else {
-          alert("Failed to fetch elections.");
+          setNotification({ 
+            message: "Failed to fetch elections.", 
+            type: "error" 
+          });
         }
       } catch (error) {
         console.error("Error fetching elections:", error);
-        alert("An error occurred while fetching elections.");
+        setNotification({ 
+          message: "An error occurred while fetching elections.", 
+          type: "error" 
+        });
       }
     };
 
@@ -52,11 +66,17 @@ const Dashboard = () => {
         if (response.ok) {
           setJoinedElections(result.joinedElections);
         } else {
-          alert("Failed to fetch joined elections.");
+          setNotification({ 
+            message: "Failed to fetch joined elections.", 
+            type: "error" 
+          });
         }
       } catch (error) {
         console.error("Error fetching joined elections:", error);
-        alert("An error occurred while fetching joined elections.");
+        setNotification({ 
+          message: "An error occurred while fetching joined elections.", 
+          type: "error" 
+        });
       }
     };
 
@@ -67,7 +87,10 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("userToken");
-    alert("You have successfully logged out.");
+    setNotification({ 
+      message: "You have successfully logged out.", 
+      type: "success" 
+    });
     navigate("/login");
   };
 
@@ -113,7 +136,10 @@ const Dashboard = () => {
           onClick={handleLogout}
           className="mt-auto w-full py-3 px-4 bg-[#D32F2F] hover:bg-[#541212] rounded flex items-center justify-center gap-2"
         >
-          <ArrowLeftOnRectangleIcon className="w-5 h-5 text-white" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+          </svg>
+
           Logout
         </button>
       </div>
@@ -129,6 +155,10 @@ const Dashboard = () => {
         </div>
 
         <div className="p-8">
+          {notification && (
+            <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+          )}
+          
           {activeSection === "myElections" && (
             <>
               <h2 className="text-2xl font-semibold text-center mb-6">My Elections</h2>
@@ -139,7 +169,11 @@ const Dashboard = () => {
                   <button
                     key={status}
                     onClick={() => setTab(status)}
-                    className={`px-4 py-2 rounded ${tab === status ? "bg-[#003366] text-white" : "bg-gray-300"}`}
+                    className={`px-4 py-2 rounded transition ${
+                      tab === status
+                        ? "bg-[#003366] text-white"
+                        : "bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-gray-100"
+                    }`}
                   >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </button>
@@ -147,10 +181,19 @@ const Dashboard = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div onClick={() => navigate(`/election-form/${userId}`)}
-                  className="bg-[#003366] text-white p-6 rounded-lg shadow-lg cursor-pointer">
-                  <h3 className="text-xl font-semibold">Create New Election</h3>
-                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div onClick={() => navigate(`/election-form/${userId}`)}
+                            className="bg-[#003366] hover:bg-[#112a43] text-white p-6 rounded-lg shadow-lg cursor-pointer">
+                            <h3 className="text-xl font-semibold">Create New Election</h3>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            Add new election
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
 
                 {filterElections(elections).map((election) => {
                   const status = getStatus(election.start_datetime, election.end_datetime);
@@ -179,10 +222,20 @@ const Dashboard = () => {
               <h2 className="text-2xl font-semibold text-center mb-6">Joined Elections</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div onClick={() => navigate(`/voter/join/${userId}`)}
-                  className="bg-[#003366] text-white p-6 rounded-lg shadow-lg cursor-pointer">
-                  <h3 className="text-xl font-semibold">Join Election</h3>
-                </div>
+
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div onClick={() => navigate(`/voter/join/${userId}`)}
+                            className="bg-[#003366] hover:bg-[#112a43] text-white p-6 rounded-lg shadow-lg cursor-pointer">
+                            <h3 className="text-xl font-semibold">Join Election</h3>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            Join an election
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
 
                 {filterElections(joinedElections).map((election) => {
                   const status = getStatus(election.start_datetime, election.end_datetime);

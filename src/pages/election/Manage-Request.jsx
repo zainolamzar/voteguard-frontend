@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import Notification from "@/components/ui/notification";
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const ManageRequest = () => {
   const { userId, electionId } = useParams();
   const navigate = useNavigate();
+  const [notification, setNotification] = useState(null);
   const [requests, setRequests] = useState([]); // State to hold the list of voter requests
   const [filteredRequests, setFilteredRequests] = useState([]); // State to hold filtered requests
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -22,11 +25,17 @@ const ManageRequest = () => {
           setRequests(result.requests);
           setFilteredRequests(result.requests); // Initialize filteredRequests
         } else {
-          alert(`Error: ${result.message}`);
+          setNotification({ 
+            message: `Error: ${result.message}`, 
+            type: "error" 
+          });
         }
       } catch (error) {
         console.error("Error fetching requests:", error);
-        alert("An error occurred while fetching requests.");
+        setNotification({ 
+          message: "An error occurred while fetching requests.", 
+          type: "error" 
+        });
       } finally {
         setIsLoading(false);
       }
@@ -45,15 +54,24 @@ const ManageRequest = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Request approved successfully.");
+        setNotification({ 
+          message: "Request approved successfully.", 
+          type: "success" 
+        });
         setRequests(requests.filter((req) => req.voter_id !== voterId)); // Remove the approved request from the list
         setFilteredRequests(filteredRequests.filter((req) => req.voter_id !== voterId)); // Update filtered list
       } else {
-        alert(`Error: ${result.message}`);
+        setNotification({ 
+          message: `Error: ${result.message}`, 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error approving request:", error);
-      alert("An error occurred while approving the request.");
+      setNotification({ 
+        message: "An error occurred while approving the request.", 
+        type: "error" 
+      });
     }
   };
 
@@ -67,15 +85,24 @@ const ManageRequest = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Request rejected successfully.");
+        setNotification({ 
+          message: "Request rejected successfully.", 
+          type: "success" 
+        });
         setRequests(requests.filter((req) => req.voter_id !== voterId)); // Remove the rejected request from the list
         setFilteredRequests(filteredRequests.filter((req) => req.voter_id !== voterId)); // Update filtered list
       } else {
-        alert(`Error: ${result.message}`);
+        setNotification({ 
+          message: `Error: ${result.message}`, 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error rejecting request:", error);
-      alert("An error occurred while rejecting the request.");
+      setNotification({ 
+        message: "An error occurred while rejecting the request.", 
+        type: "error" 
+      });
     }
   };
 
@@ -93,10 +120,16 @@ const ManageRequest = () => {
       // Update the state after batch operation
       setRequests(requests.filter((req) => !filteredRequests.includes(req)));
       setFilteredRequests([]);
-      alert("All requests are successfully accepted.");
+      setNotification({ 
+        message: "All requests are successfully accepted.", 
+        type: "success" 
+      });
     } catch (error) {
       console.error("Error approving all requests:", error);
-      alert("An error occurred while approving all requests.");
+      setNotification({ 
+        message: "An error occurred while approving all requests.", 
+        type: "error" 
+      });
     }
   };
   
@@ -114,10 +147,16 @@ const ManageRequest = () => {
       // Update the state after batch operation
       setRequests(requests.filter((req) => !filteredRequests.includes(req)));
       setFilteredRequests([]);
-      alert("All requests are successfully rejected.");
+      setNotification({ 
+        message: "All requests are successfully rejected.", 
+        type: "success" 
+      });
     } catch (error) {
       console.error("Error rejecting all requests:", error);
-      alert("An error occurred while rejecting all requests.");
+      setNotification({ 
+        message: "An error occurred while rejecting all requests.", 
+        type: "error" 
+      });
     }
   };
 
@@ -141,6 +180,10 @@ const ManageRequest = () => {
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen py-8 px-6 flex flex-col items-center">
+      {notification && (
+          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h1 className="text-3xl font-poppins font-bold text-[#003366] text-center mb-8">
           Participation Requests

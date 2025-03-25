@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Notification from "../components/ui/notification";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -19,7 +20,8 @@ const Register = () => {
     hasSymbol: false,
     hasNumber: false,
   });
-  const [isLoading, setIsLoading] = useState(false); // New state to track loading
+  const [isLoading, setIsLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -46,7 +48,10 @@ const Register = () => {
 
     // Check if passwords match
     if (formData.password !== formData.repeat_password) {
-      alert("Passwords do not match!");
+      setNotification({ 
+        message: "Passwords do not match!", 
+        type: "error" 
+      });
       return;
     }
 
@@ -57,7 +62,10 @@ const Register = () => {
       !passwordValid.hasSymbol ||
       !passwordValid.hasNumber
     ) {
-      alert("Password must meet the following requirements:\n- 1 or more uppercase letters\n- 1 or more lowercase letters\n- 1 or more symbols (e.g., !@#$%^&*)\n- 1 or more numbers");
+      setNotification({ 
+        message: "Password must meet the following requirements:\n- 1 or more uppercase letters\n- 1 or more lowercase letters\n- 1 or more symbols (e.g., !@#$%^&*)\n- 1 or more numbers", 
+        type: "error" 
+      });
       return;
     }
 
@@ -76,14 +84,14 @@ const Register = () => {
 
       const result = await response.json();
       if (response.ok) {
-        alert("Registration successful");
+        setNotification({ message: "Registration successful", type: "success" });
         navigate(`/login`);
       } else {
-        alert("Registration failed: " + result.message);
+        setNotification({ message: "Registration failed: " + result.message, type: "error" });
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("An error occurred. Please try again.");
+      setNotification({ message: "An error occurred. Please try again.", type: "error" });
     } finally {
       setIsLoading(false); // Set loading to false once the request is done
     }
@@ -91,6 +99,10 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 font-roboto">
+      {notification && (
+        <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <div className="w-full max-w-md p-8">
         <div className="flex justify-center mb-2">
           <div className="relative">

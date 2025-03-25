@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import Notification from "@/components/ui/notification";
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const JoinElection = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const [notification, setNotification] = useState(null);
   const [electionCode, setElectionCode] = useState("");
 
   const handleSubmit = async (e) => {
@@ -21,14 +24,23 @@ const JoinElection = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Participation request sent successfully!");
+        setNotification({ 
+          message: "Participation request sent successfully!", 
+          type: "success" 
+        });
         navigate(`/dashboard/${userId}`); // Redirect to dashboard after success
       } else {
-        alert(`Error: ${result.message}`);
+        setNotification({ 
+          message: `Error: ${result.message}`, 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error requesting participation:", error);
-      alert("An error occurred while requesting participation.");
+      setNotification({ 
+        message: "An error occurred while requesting participation.", 
+        type: "error" 
+      });
     }
   };
 
@@ -39,6 +51,10 @@ const JoinElection = () => {
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen flex flex-col items-center py-10 px-6">
+      {notification && (
+        <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+      
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg">
         <h1 className="text-3xl font-poppins font-bold text-[#003366] text-center mb-6">
           Join an Election

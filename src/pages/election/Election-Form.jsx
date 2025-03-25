@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import Notification from "@/components/ui/notification";
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const ElectionForm = () => {
   const { userId } = useParams(); // Get user ID from URL
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
@@ -53,14 +56,23 @@ const ElectionForm = () => {
 
       const result = await response.json();
       if (response.ok) {
-        alert("Election created successfully!");
+        setNotification({ 
+          message: "Election created successfully!", 
+          type: "success" 
+        });
         navigate(`/option-form/${userId}/${result.electionId}`);
       } else {
-        alert(`Error: ${result.message}`);
+        setNotification({ 
+          message: `Error: ${result.message}`, 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error creating election:", error);
-      alert("An error occurred. Please try again.");
+      setNotification({ 
+        message: "An error occurred. Please try again.", 
+        type: "error" 
+      });
     }
   };
 
@@ -70,6 +82,10 @@ const ElectionForm = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F5F5F5]">
+      {notification && (
+          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-2xl">
         <h2 className="text-3xl font-bold text-center text-[#003366] mb-6 font-poppins">
           Create a New Election

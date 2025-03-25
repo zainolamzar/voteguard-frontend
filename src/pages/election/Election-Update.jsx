@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+import Notification from '@/components/ui/notification';
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const ElectionUpdate = () => {
   const { userId, electionId } = useParams();
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
   // State for election data and loading/error states
@@ -67,7 +70,10 @@ const ElectionUpdate = () => {
     e.preventDefault();
     try {
       await axios.put(`${apiUrl}/api/elections/${userId}/${electionId}`, electionData);
-      alert("Election updated successfully!");
+      setNotification({ 
+        message: "Election updated successfully!", 
+        type: "success" 
+      });
       navigate(`/election/${userId}/detail/${electionId}`);
     } catch (err) {
       setError('Failed to update election');
@@ -79,6 +85,10 @@ const ElectionUpdate = () => {
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+      {notification && (
+          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <h2 className="text-3xl font-bold text-center text-[#003366] mb-6">Update Election</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Notification from "@/components/ui/notification";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const QRScan = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const { userId } = useParams(); // Get user ID from URL
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,11 +22,17 @@ const QRScan = () => {
             setQrCodeUrl(data.qrCodeUrl);
           } else {
             console.error("Error response:", await response.json());
-            alert("Unable to generate QR code. Please try again.");
+            setNotification({ 
+              message: "Unable to generate QR code. Please try again.", 
+              type: "error" 
+            });
           }
         } catch (error) {
           console.error("Error fetching QR code:", error);
-          alert("An error occurred while fetching the QR code.");
+          setNotification({ 
+            message: "An error occurred while fetching the QR code.", 
+            type: "error" 
+          });
         }
       };
 
@@ -38,6 +46,10 @@ const QRScan = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] font-roboto p-6">
+      {notification && (
+        <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
         <h2 className="text-3xl font-bold text-[#003366] mb-4">Setup OTP Authentication</h2>
         <p className="text-gray-600 text-lg mb-6">

@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import Notification from "@/components/ui/notification";
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const OptionForm = () => {
   const { userId, electionId } = useParams(); // Get user ID and election ID from URL
   const navigate = useNavigate();
+  const [notification, setNotification] = useState(null);
   const [options, setOptions] = useState([{ id: "1", name: "", description: "" }]);
 
   const handleOptionChange = (index, field, value) => {
@@ -43,19 +46,32 @@ const OptionForm = () => {
 
       const result = await response.json();
       if (response.ok) {
-        alert("Options added successfully!");
+        setNotification({ 
+          message: "Options added successfully!", 
+          type: "success" 
+        });
         navigate(`/generate-key/${userId}/${electionId}`);
       } else {
-        alert(`Error: ${result.message}`);
+        setNotification({ 
+          message: `Error: ${result.message}`, 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error updating options:", error);
-      alert("An error occurred. Please try again.");
+      setNotification({ 
+        message: "An error occurred. Please try again.", 
+        type: "error" 
+      });
     }
   };
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen flex items-center justify-center p-6">
+      {notification && (
+          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h2 className="text-3xl font-bold text-[#003366] text-center mb-6 font-poppins">
           Add Options

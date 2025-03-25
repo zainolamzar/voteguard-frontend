@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import Notification from "@/components/ui/notification";
+
 const apiUrl = import.meta.env.VITE_BE_URL;
 
 const GenerateKey = () => {
   const { userId, electionId } = useParams(); // Get user ID and election ID from URL
   const navigate = useNavigate();
+  const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // Track loading state
 
   const handleGenerateKeys = async () => {
@@ -18,14 +21,23 @@ const GenerateKey = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Keys generated successfully!");
+        setNotification({ 
+          message: "Keys generated successfully!", 
+          type: "success" 
+        });
         navigate(`/dashboard/${userId}`);
       } else {
-        alert(`Error: ${result.message}`);
+        setNotification({ 
+          message: `Error: ${result.message}`, 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error generating keys:", error);
-      alert("An error occurred while generating the keys. Please try again.");
+      setNotification({ 
+        message: "An error occurred while generating the keys. Please try again.", 
+        type: "error" 
+      });
     } finally {
       setIsLoading(false); // Reset loading state
     }
@@ -33,6 +45,10 @@ const GenerateKey = () => {
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen flex items-center justify-center px-4">
+      {notification && (
+          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+      )}
+
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
         <h2 className="text-2xl font-bold text-[#003366] font-poppins mb-6">
           Generate Keys for Election
