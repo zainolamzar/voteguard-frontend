@@ -74,7 +74,10 @@ const ElectionUpdate = () => {
         message: "Election updated successfully!", 
         type: "success" 
       });
-      navigate(`/election/${userId}/detail/${electionId}`);
+
+      setTimeout(() => {
+        navigate(`/election/${userId}/detail/${electionId}`);
+      }, 2000);
     } catch (err) {
       setError('Failed to update election');
     }

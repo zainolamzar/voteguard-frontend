@@ -84,8 +84,14 @@ const Register = () => {
 
       const result = await response.json();
       if (response.ok) {
-        setNotification({ message: "Registration successful", type: "success" });
-        navigate(`/login`);
+        setNotification({ 
+          message: "Registration successful", 
+          type: "success" 
+        });
+        
+        setTimeout(() => {
+          navigate(`/login`);
+        }, 2000);
       } else {
         setNotification({ message: "Registration failed: " + result.message, type: "error" });
       }

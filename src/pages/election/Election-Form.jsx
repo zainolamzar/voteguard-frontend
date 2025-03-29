@@ -60,7 +60,10 @@ const ElectionForm = () => {
           message: "Election created successfully!", 
           type: "success" 
         });
-        navigate(`/option-form/${userId}/${result.electionId}`);
+
+        setTimeout(() => {
+          navigate(`/option-form/${userId}/${result.electionId}`);
+        }, 2000);
       } else {
         setNotification({ 
           message: `Error: ${result.message}`, 

@@ -28,7 +28,10 @@ const JoinElection = () => {
           message: "Participation request sent successfully!", 
           type: "success" 
         });
-        navigate(`/dashboard/${userId}`); // Redirect to dashboard after success
+
+        setTimeout(() => {
+          navigate(`/dashboard/${userId}`); // Redirect to dashboard after success
+        }, 2000);
       } else {
         setNotification({ 
           message: `Error: ${result.message}`, 

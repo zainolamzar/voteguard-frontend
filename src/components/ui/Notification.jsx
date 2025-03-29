@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 const Notification = ({ message, type, onClose }) => {
   useEffect(() => {
-    const timer = setTimeout(onClose, 4000); // Auto close after 4s
+    const timer = setTimeout(onClose, 3000);
     return () => clearTimeout(timer);
   }, [onClose]);
 

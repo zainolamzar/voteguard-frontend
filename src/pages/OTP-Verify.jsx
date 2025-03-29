@@ -25,7 +25,10 @@ const OTPVerify = () => {
           message: "OTP Verified!", 
           type: "success" 
         });
-        navigate(`/dashboard/${userId}`);
+
+        setTimeout(() => {
+          navigate(`/dashboard/${userId}`);
+        }, 2000);
       } else {
         setNotification({ 
           message: "OTP verification failed: " + result.message, 

@@ -50,7 +50,10 @@ const OptionForm = () => {
           message: "Options added successfully!", 
           type: "success" 
         });
-        navigate(`/generate-key/${userId}/${electionId}`);
+
+        setTimeout(() => {
+          navigate(`/generate-key/${userId}/${electionId}`);
+        }, 2000);
       } else {
         setNotification({ 
           message: `Error: ${result.message}`, 

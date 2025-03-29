@@ -25,7 +25,10 @@ const GenerateKey = () => {
           message: "Keys generated successfully!", 
           type: "success" 
         });
-        navigate(`/dashboard/${userId}`);
+        
+        setTimeout(() => {
+          navigate(`/dashboard/${userId}`);
+        }, 2000);
       } else {
         setNotification({ 
           message: `Error: ${result.message}`, 

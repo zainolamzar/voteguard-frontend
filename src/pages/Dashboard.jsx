@@ -92,7 +92,10 @@ const Dashboard = () => {
       message: "You have successfully logged out.", 
       type: "success" 
     });
-    navigate("/login");
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
   };
 
   const getStatus = (startDatetime, endDatetime) => {
@@ -181,7 +184,7 @@ const Dashboard = () => {
                   ))}
                 </div>
 
-                <ScrollArea className="h-72 w-full">
+                <ScrollArea className="h-[15rem] w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <TooltipProvider>
                       <Tooltip>
@@ -242,7 +245,7 @@ const Dashboard = () => {
                   ))}
                 </div>
 
-                <ScrollArea className="h-[24rem] w-full">
+                <ScrollArea className="h-[15rem] w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                   <TooltipProvider>

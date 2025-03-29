@@ -23,6 +23,7 @@ const JoinedElectionDetail = () => {
   const [votesPercent, setVotesPercent] = useState("");
   const [electionParticipation, setElectionParticipation] = useState("");
   const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState("00:00:00:00");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -158,7 +159,10 @@ const JoinedElectionDetail = () => {
           window.location.reload();
         }
       } else {
-        alert(result.message || "Failed to submit vote.");
+        setNotification({ 
+          message: result.message || "Failed to submit vote.", 
+          type: "error" 
+        });
       }
     } catch (error) {
       console.error("Error submitting vote:", error);
@@ -170,6 +174,50 @@ const JoinedElectionDetail = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let interval;
+
+    const updateCountdown = () => {
+      if (!election) return;
+
+      let targetDate;
+      if (electionStatus === "In Process") {
+        targetDate = new Date(election.start_datetime);
+      } else if (electionStatus === "Ongoing") {
+        targetDate = new Date(election.end_datetime);
+      } else {
+        setCountdown("00:00:00:00");
+        return;
+      }
+
+      const now = new Date();
+      const timeDiff = targetDate - now;
+
+      if (timeDiff <= 0) {
+        setCountdown("00:00:00:00");
+        return;
+      }
+
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
+      const seconds = Math.floor((timeDiff / 1000) % 60);
+
+      setCountdown(
+        `${days.toString().padStart(2, "0")}:${hours
+          .toString()
+          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}`
+      );
+    };
+
+    updateCountdown();
+    interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [election, electionStatus]);
 
   return (
     <div className="flex h-screen bg-[#F5F5F5]">
@@ -191,26 +239,6 @@ const JoinedElectionDetail = () => {
           <Users className="mr-2" />
           Voters
         </button>
-        {!electionEnded && (
-          <button
-            className={`flex items-center w-full p-3 rounded-md ${activeTab === "vote" ? "bg-[#004080]" : "hover:bg-[#004080]"}`}
-            onClick={() => setActiveTab("vote")}
-          >
-            <BarChart2 className="mr-2" />
-            Vote Now!
-          </button>
-        )}
-        {electionEnded && (
-          <button
-            className={`flex items-center w-full p-3 rounded-md ${
-              activeTab === "results" ? "bg-[#004080]" : "hover:bg-[#004080]"
-            }`}
-            onClick={() => setActiveTab("results")}
-          >
-            <BarChart2 className="mr-2" />
-            Results
-          </button>
-        )}
       </nav>
 
       {/* Start and End Date */}
@@ -235,16 +263,18 @@ const JoinedElectionDetail = () => {
       
       {activeTab === "overview" && election && (
         <div>
-          <div className="flex items-center gap-4 mb-4">
-              {/* Election Title */}
-              <h1 className="text-3xl font-bold text-[#003366] whitespace-nowrap">
-                {election.title} Overview
-              </h1>
+          <div className="grid grid-cols-5 grid-rows-1 gap-4">
+            {/* Left Side - Election Overview */}
+            <div className="col-span-3">
+              <div className="flex items-center gap-4 mb-4 w-full">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-4xl font-bold text-[#003366]">
+                    {election.title} Overview
+                  </h1>
+                </div>
 
-              {/* Election Status */}
-              <span
-                className={`px-3 py-1 rounded text-white font-medium text-sm
-                  ${
+                <span
+                  className={`px-3 py-1 rounded text-white font-medium text-m ${
                     electionStatus === "Ongoing"
                       ? "bg-green-500"
                       : electionStatus === "In Process"
@@ -253,16 +283,177 @@ const JoinedElectionDetail = () => {
                       ? "bg-red-500"
                       : "bg-gray-500"
                   }`}
-              >
-                {electionStatus}
-              </span>
-            </div>
-          <p className="text-gray-700 font-roboto mb-4">{election.election_code}</p>
-          <p className="text-gray-700 font-roboto mb-4">{election.description}</p>
+                >
+                  {electionStatus}
+                </span>
+              </div>
 
-          {/* Display Start and End Date */}
-          <p className="text-lg"><strong>Start Date:</strong> {startDate}</p>
-          <p className="text-lg"><strong>End Date:</strong> {endDate}</p>
+              <p className="text-gray-700 font-roboto mb-[0.5rem] text-[1.2rem]">
+                <strong>Description:</strong> {election.description}
+              </p>
+              
+              {/* Display Start and End Date */}
+              <p className="text-lg"><strong>Start Date:</strong> {startDate}</p>
+              <p className="text-lg"><strong>End Date:</strong> {endDate}</p>
+            </div>
+
+            {/* Right Side - Countdown Timer */}
+            <div className="col-span-2 col-start-4 flex flex-col justify-center items-end w-full h-full">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col items-center w-fit">
+                  <p className="text-lg font-semibold text-gray-800 text-center">
+                    {electionStatus === "In Process"
+                      ? "Election will start in"
+                      : electionStatus === "Ongoing"
+                      ? "Election will end in"
+                      : "Election has ended"}
+                  </p>
+
+                  <div className="grid grid-cols-4 gap-2 w-full mt-2">
+                    {countdown.split(":").map((time, index) => (
+                      <div
+                        key={index}
+                        className="relative w-16 h-20 bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg flex flex-col items-center justify-center"
+                      >
+                        <div className="absolute top-0 left-0 w-full h-1/2 bg-gray-900 flex items-center justify-center border-b border-gray-700">
+                          <span className="text-5xl font-bold translate-y-1/3">{time}</span>
+                        </div>
+
+                        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gray-800 flex items-center justify-center">
+                          <span className="text-5xl font-bold -translate-y-1/2">{time}</span>
+                        </div>
+
+                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-sm text-gray-300">
+                          {["Days", "Hours", "Minutes", "Seconds"][index]}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* "Vote Now!" Section (Visible only before election ends) */}
+          {new Date() < new Date(election.end_datetime) && (
+            <div className="mt-8 pt-6">
+              <h2 className="text-3xl font-bold text-[#003366] mb-2">Vote Now!</h2>
+              
+              {isEligible ? (
+                <div className="vote-options border-2 border-[#003366] border-double space-y-6">
+                  <h3 className="text-lg font-roboto text-[#003366]">Select your vote:</h3>
+                  {election.options && election.options.length > 0 ? (
+                    <form>
+                      {election.options.map((option, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id={`option-${index}`}
+                            name="vote"
+                            value={option.id}
+                            checked={vote === option.id}
+                            onChange={() => setVote(option.id)}
+                            className="h-5 w-5"
+                          />
+                          <label htmlFor={`option-${index}`} className="font-roboto">
+                            <strong>{option.name}</strong> - {option.description}
+                          </label>
+                        </div>
+                      ))}
+                    </form>
+                  ) : (
+                    <p>No voting options available.</p>
+                  )}
+
+                  <button
+                    onClick={handleVoteSubmit}
+                    disabled={loading}
+                    className={`w-full py-3 text-white font-roboto rounded-lg transition duration-300 ${
+                      loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#00897B] hover:bg-[#00695C]"
+                    }`}
+                  >
+                    {loading ? "Loading..." : "Submit Vote"}
+                  </button>
+                </div>
+              ) : (
+                <p className="font-roboto text-lg text-red-500">
+                  {election.has_voted === 1
+                    ? "You have already voted in this election."
+                    : new Date() < new Date(election.start_datetime)
+                    ? "The election has not started yet."
+                    : "The election has ended."}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* "Result" Section (Visible only after election ends) */}
+          {new Date() > new Date(election.end_datetime) && (
+            <div className="mt-8 pt-6">
+              <h2 className="text-3xl font-bold text-[#003366] mb-2">Election Results</h2>
+              
+              {resultsLaunched ? (
+                <div className="grid grid-cols-4 grid-rows-3 gap-3">
+                    <div className="col-span-2 bg-[#004080] hover:bg-[#002855] transition text-white 
+                                    rounded-lg p-2 text-center shadow-md flex flex-col 
+                                    items-center justify-center w-full h-full">
+                      <p className="text-xl font-bold w-full">
+                        <strong>Winner:</strong> {winner}
+                      </p>
+                    </div>
+
+                    <div className="col-span-2 col-start-3 bg-[#004080] hover:bg-[#002855] transition text-white 
+                                    rounded-lg p-2 text-center shadow-md flex flex-col 
+                                    items-center justify-center w-full h-full">
+                      <p className="text-xl font-bold w-full">
+                        <strong>Total Votes:</strong> {totalVotes}
+                      </p>
+                    </div>
+                    <div className="col-span-2 row-span-2 row-start-2 bg-[#004080] hover:bg-[#002855] transition text-white rounded-lg p-4 shadow-md flex items-center justify-center space-x-4">
+                      {/* SVG Half-Circle Progress Bar */}
+                      <svg width="100" height="60" viewBox="0 0 120 60">
+                        <defs>
+                          <linearGradient id="progressGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#FFD700" />
+                            <stop offset="100%" stopColor="#FFA500" />
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Background Arc */}
+                        <path d="M10,50 A50,50 0 0,1 110,50" stroke="#333" strokeWidth="8" fill="none" />
+                        
+                        {/* Progress Arc */}
+                        <path 
+                          d="M10,50 A50,50 0 0,1 110,50"
+                          stroke="url(#progressGradient)" 
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray="157"
+                          strokeDashoffset={157 - (157 * votesPercent) / 100} 
+                          strokeLinecap="round"
+                          className="transition-all duration-500"
+                        />
+                      </svg>
+
+                      {/* Winning Percentage Text */}
+                      <p className="text-lg font-semibold"><strong>Winning Percentage:</strong> {Math.floor(votesPercent)}%</p>
+                    </div>
+                    <div className="col-span-2 row-span-2 col-start-3 row-start-2 
+                                    bg-[#004080] hover:bg-[#002855] transition text-white 
+                                    rounded-lg p-2 text-center shadow-md flex flex-col 
+                                    items-center justify-center w-full h-full">
+                      <p className="text-lg font-semibold w-full">
+                        <strong>Participation:</strong> {electionParticipation} Voter(s)
+                      </p>
+                    </div>
+                </div>
+              ) : (
+                <p className="font-roboto text-xl text-[#FFC107]">
+                  Election result will be released soon!
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -293,85 +484,6 @@ const JoinedElectionDetail = () => {
               <p className="text-gray-600 font-roboto p-4">No accepted voters yet.</p>
             )}
           </div>
-        </div>
-      )}
-
-      {activeTab === "vote" && (
-        <>
-          {new Date() > new Date(election.end_datetime) ? (
-            <p className="font-roboto text-lg text-red-500">
-              The election has ended.
-            </p>
-          ) : isEligible ? (
-            <div className="vote-options space-y-6">
-              <h3 className="text-lg font-roboto text-[#003366]">Select your vote:</h3>
-              {election.options && election.options.length > 0 ? (
-                <form>
-                  {election.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id={`option-${index}`}
-                        name="vote"
-                        value={option.id}
-                        checked={vote === option.id}
-                        onChange={() => setVote(option.id)}
-                        className="h-5 w-5"
-                      />
-                      <label htmlFor={`option-${index}`} className="font-roboto">
-                        <strong>{option.name}</strong> - {option.description}
-                      </label>
-                    </div>
-                  ))}
-                </form>
-              ) : (
-                <p>No voting options available.</p>
-              )}
-              <button
-                onClick={handleVoteSubmit}
-                disabled={loading}
-                className={`w-full py-3 text-white font-roboto rounded-lg transition duration-300 ${
-                  loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#00897B] hover:bg-[#00695C]"
-                }`}
-              >
-                {loading ? "Loading..." : "Submit Vote"}
-              </button>
-            </div>
-          ) : (
-            <p className="font-roboto text-lg text-red-500">
-              {election.has_voted === 1
-                ? "You have already voted in this election."
-                : new Date() < new Date(election.start_datetime)
-                ? "The election has not started yet."
-                : "The election has ended."}
-            </p>
-          )}
-        </>
-      )}
-      
-      {activeTab === "results" && (
-        <div>
-          <h2 className="text-2xl font-bold text-[#003366] mb-4">Election Results</h2>
-      
-          {/* Show Results Only If They Have Been Launched */}
-          {new Date() > new Date(election.end_datetime) ? (
-            resultsLaunched ? (
-              <div className="result-container space-y-4 bg-[#003366] text-white p-6 rounded-lg">
-                <p><strong>Winner:</strong> {winner}</p>
-                <p><strong>Total Votes:</strong> {totalVotes}</p>
-                <p><strong>Winning Percentage:</strong> {Math.floor(votesPercent)}%</p>
-                <p><strong>Participation:</strong> {electionParticipation} Voter(s)</p>
-              </div>
-            ) : (
-              <p className="font-roboto text-xl text-[#FFC107]">
-                Election result will be released soon!
-              </p>
-            )
-          ) : (
-            <p className="font-roboto text-lg text-red-500">
-              The election is still ongoing. Results will be available after it ends.
-            </p>
-          )}
         </div>
       )}
 
